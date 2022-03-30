@@ -1,0 +1,42 @@
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+buildscript {
+    repositories {
+        gradlePluginPortal()
+        google()
+        mavenCentral()
+    }
+    dependencies{
+        classpath 'com.android.tools.build:gradle:7.0.3'
+        classpath "io.github.howardpang:androidNativeBundle:1.1.1"
+    }
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}
+
+def getRepositoryUsername() {
+    Properties properties = new Properties()
+    properties.load(project.rootProject.file('local.properties').newDataInputStream())
+    return properties.getProperty('gpr.user')
+}
+
+def getRepositoryPassword() {
+    Properties properties = new Properties()
+    properties.load(project.rootProject.file('local.properties').newDataInputStream())
+    return properties.getProperty('gpr.pass')
+}
+
+allprojects{
+    repositories {
+        gradlePluginPortal()
+        google()
+        maven {
+            url = uri("https://maven.pkg.github.com/DoMondo/Fancier")
+            credentials {
+                username = getRepositoryUsername()
+                password = getRepositoryPassword()
+            }
+        }
+    }
+}

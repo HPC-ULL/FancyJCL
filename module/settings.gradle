@@ -1,0 +1,3 @@
+rootProject.name = "fancierfrontend_testapp"
+include ':app'
+include ':fancierfrontend'
