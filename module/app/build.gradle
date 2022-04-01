@@ -14,16 +14,33 @@ android {
     }
 
     buildTypes {
+        debug {
+            packagingOptions {
+                doNotStrip '**/*.so'
+            }
+            jniDebuggable true
+            debuggable true
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_12
+        targetCompatibility JavaVersion.VERSION_12
+    }
+
+    splits {
+        abi {
+            enable false
+            universalApk true
+        }
     }
     packagingOptions {
+        exclude 'lib/*/libOpenCL.so'
         pickFirst 'lib/*/libfancier.so'
         pickFirst 'lib/*/libfancier_tiling.so'
     }
