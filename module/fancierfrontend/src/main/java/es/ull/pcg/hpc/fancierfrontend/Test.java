@@ -4,14 +4,14 @@ import es.ull.pcg.hpc.fancier.Fancier;
 import timber.log.Timber;
 
 public class Test {
-    private native static int test();
 
     public static void doTest(String basePath) {
         Timber.d("test");
         System.loadLibrary("fancierfrontend");
         Fancier.init(basePath);
 
-        int size = 100;
+        int size = 25;
+        float kConstant = -2;
 
         // Have the data in java
         byte[] input = new byte[size];
@@ -22,11 +22,11 @@ public class Test {
         Stage stage = new Stage("test_stage");
         try {
             stage.setKernelSource("""
-    output[d0] = input[d0] * 2;
+    output[d0] = input[d0] * kConstant;
             """);
             // Initialization
-            stage.setInputs(input);
-            stage.setInputNames("input");
+            stage.setInputs(input, kConstant);
+            stage.setInputNames("input", "kConstant");
             stage.setOutputs(output);
             stage.setOutputNames("output");
             stage.setRunConfiguration(new RunConfiguration(new long[]{size}, new long[]{size}));
@@ -41,11 +41,10 @@ public class Test {
             Timber.d("Execution finished");
             output = (byte[]) stage.getOutput(0);
 
-
             // Check the results
-//            for (int i = 0; i < output.length; i++) {
-//                Timber.d("[%d]=%d", i, output[i]);
-//            }
+            for (int i = 0; i < output.length; i++) {
+                Timber.d("[%d]=%d", i, output[i]);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }

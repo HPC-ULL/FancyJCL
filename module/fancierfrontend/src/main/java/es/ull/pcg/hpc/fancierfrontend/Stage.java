@@ -35,10 +35,14 @@ public class Stage {
         this.kernelSource = kernelSource;
     }
 
-    private String generateKernel() {
+    private String generateKernel() throws Exception {
         String signature = "kernel void " + name + "(";
         for (int i = 0; i < inputs.size(); i++) {
-            signature += "global const " + FancierConverter.getOCLType(inputs.get(i)) + " " + inputNames.get(i);
+            if (FancierConverter.isBasicType(inputs.get(i))) {
+                signature += "const " + FancierConverter.getOCLType(inputs.get(i)) + " " + inputNames.get(i);
+            } else {
+                signature += "global const " + FancierConverter.getOCLType(inputs.get(i)) + " " + inputNames.get(i);
+            }
             signature += ", ";
         }
         for (int i = 0; i < outputs.size(); i++) {
@@ -166,8 +170,13 @@ public class Stage {
         } else {
             for (int i = 0; i < inputs.size(); i++) {
                 long size = FancierConverter.getSize(inputs.get(i));
-                Timber.i("\t\t%d: \"%s\" (%s)[%d]", i, inputNames.get(i),
-                        inputTypes.get(i), size);
+                if (size != 0) {
+                    Timber.i("\t\t%d: \"%s\" (%s)[%d]", i, inputNames.get(i),
+                            inputTypes.get(i), size);
+                } else {
+                    Timber.i("\t\t%d: \"%s\" (%s)", i, inputNames.get(i),
+                            inputTypes.get(i));
+                }
             }
         }
         // Print outputs
@@ -177,8 +186,13 @@ public class Stage {
         } else {
             for (int i = 0; i < outputs.size(); i++) {
                 long size = FancierConverter.getSize(outputs.get(i));
-                Timber.i("\t\t%d: \"%s\" (%s)[%d]", i, outputNames.get(i),
-                        outputTypes.get(i), size);
+                if (size != 0) {
+                    Timber.i("\t\t%d: \"%s\" (%s)[%d]", i, outputNames.get(i),
+                            outputTypes.get(i), size);
+                } else {
+                    Timber.i("\t\t%d: \"%s\" (%s)", i, outputNames.get(i),
+                            outputTypes.get(i));
+                }
             }
         }
         // Print kernel

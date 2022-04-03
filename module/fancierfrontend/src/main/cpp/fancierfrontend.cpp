@@ -5,38 +5,49 @@
 
 #define  LOGD(...)  __android_log_print(ANDROID_LOG_DEBUG,      "MODULE_EXAMPLE", __VA_ARGS__)
 
-extern "C"
-JNIEXPORT int JNICALL
-Java_es_ull_pcg_hpc_fancierfrontend_Test_test(JNIEnv *env, jclass thiz) {
-    int err;
-    err = fcFancier_initJNI(env);
-    FC_EXCEPTION_HANDLE_ERROR(env, err, "fcFancier_initJNI", JNI_FALSE);
-    fcFancier_releaseJNI(env);
-    return err;
-}
-
 int set_ocl_parameter(JNIEnv *env, jobject jobj, jstring jtype, cl_uint index, cl_kernel kernel) {
     const char *type = env->GetStringUTFChars(jtype, nullptr);
-    int err;
+    int err = 0;
     if (strcmp(type, "ByteArray") == 0) {
         fcByteArray *data = fcByteArray_getJava(env, jobj);
         err = clSetKernelArg(kernel, index, sizeof(cl_mem), &data->ocl);
-    }
-    if (strcmp(type, "ShortArray") == 0) {
+    } else if (strcmp(type, "ShortArray") == 0) {
         fcShortArray *data = fcShortArray_getJava(env, jobj);
         err = clSetKernelArg(kernel, index, sizeof(cl_mem), &data->ocl);
-    }
-    if (strcmp(type, "IntArray") == 0) {
+    } else if (strcmp(type, "IntArray") == 0) {
         fcIntArray *data = fcIntArray_getJava(env, jobj);
         err = clSetKernelArg(kernel, index, sizeof(cl_mem), &data->ocl);
-    }
-    if (strcmp(type, "FloatArray") == 0) {
+    } else if (strcmp(type, "FloatArray") == 0) {
         fcFloatArray *data = fcFloatArray_getJava(env, jobj);
         err = clSetKernelArg(kernel, index, sizeof(cl_mem), &data->ocl);
-    }
-    if (strcmp(type, "DoubleArray") == 0) {
+    } else if (strcmp(type, "DoubleArray") == 0) {
         fcDoubleArray *data = fcDoubleArray_getJava(env, jobj);
         err = clSetKernelArg(kernel, index, sizeof(cl_mem), &data->ocl);
+    } else if (strcmp(type, "char") == 0) {
+        jclass cls = env->FindClass("java/lang/Byte");
+        jmethodID getVal = env->GetMethodID(cls, "byteValue", "()B");
+        char val = env->CallByteMethod(jobj, getVal);
+        err = clSetKernelArg(kernel, index, sizeof(char), &val);
+    } else if (strcmp(type, "short") == 0) {
+        jclass cls = env->FindClass("java/lang/Short");
+        jmethodID getVal = env->GetMethodID(cls, "shortValue", "()S");
+        short val = env->CallShortMethod(jobj, getVal);
+        err = clSetKernelArg(kernel, index, sizeof(short), &val);
+    } else if (strcmp(type, "int") == 0) {
+        jclass cls = env->FindClass("java/lang/Integer");
+        jmethodID getVal = env->GetMethodID(cls, "intValue", "()I");
+        int val = env->CallIntMethod(jobj, getVal);
+        err = clSetKernelArg(kernel, index, sizeof(int), &val);
+    } else if (strcmp(type, "float") == 0) {
+        jclass cls = env->FindClass("java/lang/Float");
+        jmethodID getVal = env->GetMethodID(cls, "floatValue", "()F");
+        float val = env->CallFloatMethod(jobj, getVal);
+        err = clSetKernelArg(kernel, index, sizeof(float), &val);
+    } else if (strcmp(type, "double") == 0) {
+        jclass cls = env->FindClass("java/lang/Double");
+        jmethodID getVal = env->GetMethodID(cls, "doubleValue", "()D");
+        double val = env->CallDoubleMethod(jobj, getVal);
+        err = clSetKernelArg(kernel, index, sizeof(double), &val);
     }
     FC_EXCEPTION_HANDLE_ERROR(env, err, "clSetKernelArg", JNI_FALSE);
     env->ReleaseStringUTFChars(jtype, type);

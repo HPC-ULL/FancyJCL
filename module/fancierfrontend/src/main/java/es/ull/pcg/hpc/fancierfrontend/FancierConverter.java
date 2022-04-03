@@ -1,6 +1,5 @@
 package es.ull.pcg.hpc.fancierfrontend;
 
-import java.lang.reflect.Array;
 import java.util.Locale;
 import java.util.Objects;
 
@@ -16,9 +15,9 @@ public class FancierConverter {
     static public Object convert(Object input) throws Exception {
         // Check that class is an array
         if (!input.getClass().isArray()) {
-            throw new Exception("Provided parameter is not an array");
+            return input;
         }
-        return switch (Objects.requireNonNull(Objects.requireNonNull(input.getClass().getComponentType()).getCanonicalName())) {
+        return switch (input.getClass().getComponentType().getCanonicalName()) {
             case "byte" -> FancierConverter.convert((byte[]) input);
             case "short" -> FancierConverter.convert((short[]) input);
             case "int" -> FancierConverter.convert((int[]) input);
@@ -36,7 +35,6 @@ public class FancierConverter {
             case "IntArray" -> ((IntArray) input).syncToOCL();
             case "FloatArray" -> ((FloatArray) input).syncToOCL();
             case "DoubleArray" -> ((DoubleArray) input).syncToOCL();
-            default -> throw new Exception("Provided parameter has an unknown type: " + input.getClass().getComponentType());
         }
     }
 
@@ -65,7 +63,7 @@ public class FancierConverter {
     }
 
     static public long getSize(Object input) throws Exception {
-        String className = Objects.requireNonNull(input.getClass().getCanonicalName());
+        String className = input.getClass().getCanonicalName();
         if (className.contains("ByteArray"))
             return ((ByteArray) input).length();
         if (className.contains("ShortArray"))
@@ -76,17 +74,47 @@ public class FancierConverter {
             return ((FloatArray) input).length();
         if (className.contains("DoubleArray"))
             return ((DoubleArray) input).length();
-        throw new Exception("Provided parameter has an unknown type: " + input.getClass().getCanonicalName());
+        // Basic type
+        return 0;
     }
 
-    static public String getType(Object input) {
-        String className = Objects.requireNonNull(input.getClass().getCanonicalName());
-        return className.replaceAll(".*[.]", "");
+    static public String getType(Object input) throws Exception {
+        String className = input.getClass().getCanonicalName();
+        if (!isBasicType(input)) {
+            return className.replaceAll(".*[.]", "");
+        }
+        // Basic type
+        switch (className) {
+            case "java.lang.Byte" -> {
+                return "char";
+            }
+            case "java.lang.Short" -> {
+                return "short";
+            }
+            case "java.lang.Integer" -> {
+                return "int";
+            }
+            case "java.lang.Float" -> {
+                return "float";
+            }
+            case "java.lang.Double" -> {
+                return "double";
+            }
+            default -> throw new Exception("Provided parameter has an unknown type: " + className);
+        }
     }
 
-    static public String getOCLType(Object input) {
-        String className = Objects.requireNonNull(input.getClass().getCanonicalName());
-        return className.replaceAll(".*[.]", "").toLowerCase(Locale.ROOT).replace("array", "*").replace("byte", "char");
+    static public boolean isBasicType(Object input) {
+        return !input.getClass().getCanonicalName().contains("fancier");
+    }
+
+    static public String getOCLType(Object input) throws Exception {
+        if (!isBasicType(input)) {
+            String className = Objects.requireNonNull(input.getClass().getCanonicalName());
+            return className.replaceAll(".*[.]", "").toLowerCase(Locale.ROOT).replace("array",
+                    "*").replace("byte", "char");
+        }
+        return FancierConverter.getType(input);
     }
 
     static public ByteArray convert(byte[] input) {
