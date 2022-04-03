@@ -29,8 +29,8 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_12
-        targetCompatibility JavaVersion.VERSION_12
+        sourceCompatibility JavaVersion.VERSION_15
+        targetCompatibility JavaVersion.VERSION_15
     }
 
     splits {
