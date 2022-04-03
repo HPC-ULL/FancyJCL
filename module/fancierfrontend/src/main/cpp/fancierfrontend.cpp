@@ -79,24 +79,30 @@ Java_es_ull_pcg_hpc_fancierfrontend_Stage_prepare(JNIEnv *env, jobject thiz, jst
     env->ReleaseStringUTFChars(kernel_source, kernel_source_c);
     env->ReleaseStringUTFChars(kernel_name, kernel_name_c);
 
-    // Return program and kernel native pointers
+    // Return kernel native pointer
     jclass clazz = env->GetObjectClass(thiz);
-    jfieldID returnParam1Field = env->GetFieldID(clazz, "cl_program_ptr", "J");
     jfieldID returnParam2Field = env->GetFieldID(clazz, "cl_kernel_ptr", "J");
-    env->SetLongField(thiz, returnParam1Field, (jlong) program);
     env->SetLongField(thiz, returnParam2Field, (jlong) kernel);
     return 0;
 }
 extern "C"
 JNIEXPORT jlong JNICALL
 Java_es_ull_pcg_hpc_fancierfrontend_Stage_run(JNIEnv *env, jobject thiz, jlong cl_kernel_ptr,
-                                              jintArray dimensions) {
+                                              jlongArray dimensions, jlongArray parallelization) {
     int ndims = env->GetArrayLength(dimensions);
-    auto dims_c = env->GetIntArrayElements(dimensions, nullptr);
-    size_t * dims_ocl = new size_t[ndims];
-    for (int i = 0; i < ndims; i ++) {
+    // Get dimensions to an array
+    auto dims_c = env->GetLongArrayElements(dimensions, nullptr);
+    size_t *dims_ocl = new size_t[ndims];
+    for (int i = 0; i < ndims; i++) {
         dims_ocl[i] = dims_c[i];
     }
+    // Get parallelization to an array
+    auto parallelization_c = env->GetLongArrayElements(parallelization, nullptr);
+    size_t *parallelization_ocl = new size_t[ndims];
+    for (int i = 0; i < ndims; i++) {
+        parallelization_ocl[i] = parallelization_c[i];
+    }
+    // Enqueue the kernel for execution
     int err;
     cl_kernel kernel_pointer = (cl_kernel) cl_kernel_ptr;
     err = clEnqueueNDRangeKernel(fcOpenCL_rt.queue,
@@ -104,13 +110,14 @@ Java_es_ull_pcg_hpc_fancierfrontend_Stage_run(JNIEnv *env, jobject thiz, jlong c
                                  ndims,
                                  nullptr,
                                  dims_ocl, // global work size
-                                 nullptr, // local work size
+                                 parallelization_ocl, // local work size
                                  0,
                                  nullptr,
                                  nullptr);
     FC_EXCEPTION_HANDLE_ERROR(env, err, "clEnqueueNDRangeKernel", JNI_FALSE);
     return 0;
 }
+
 extern "C"
 JNIEXPORT jlong JNICALL
 Java_es_ull_pcg_hpc_fancierfrontend_Stage_waitForQueueToFinish(JNIEnv *env, jobject thiz) {

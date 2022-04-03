@@ -1,6 +1,5 @@
 package es.ull.pcg.hpc.fancierfrontend;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -8,18 +7,17 @@ import timber.log.Timber;
 
 public class Stage {
     private final String name;
-    // These two attributes will be set from JNI when kernel is created in `prepare`
-    public long cl_program_ptr;
+    private final String kernelName;
+    // This attribute will be set from JNI when kernel is created in `prepare`
     public long cl_kernel_ptr;
     private String kernelSource = null;
-    private final String kernelName;
     private ArrayList<Object> inputs = null;
     private ArrayList<String> inputTypes = null;
     private ArrayList<String> inputNames = null;
     private ArrayList<Object> outputs = null;
     private ArrayList<String> outputTypes = null;
     private ArrayList<String> outputNames = null;
-    private boolean inputsInGpu = false;
+    private RunConfiguration runConfiguration = null;
 
     public Stage(String name) {
         this.name = name;
@@ -29,7 +27,8 @@ public class Stage {
     private native long prepare(String kernel_source, String kernel_name, Object[] inputs,
                                 Object[] outputs, Object[] input_types, Object[] output_types);
 
-    private native long run(long cl_kernel_ptr, int[] dimensions);
+    private native long run(long cl_kernel_ptr, long[] dimensions, long[] parallelization);
+
     private native long waitForQueueToFinish();
 
     public void setKernelSource(String kernelSource) {
@@ -117,6 +116,12 @@ public class Stage {
         Collections.addAll(outputNames, names);
     }
 
+    /**
+     * Prepare.
+     * Compiles the kernel and sets its parameters
+     *
+     * @throws Exception the exception
+     */
     public void prepare() throws Exception {
         // Compile and set arguments kernel
         if (!(kernelSource != null && inputs != null && outputs != null && inputNames != null && outputNames != null)) {
@@ -126,8 +131,8 @@ public class Stage {
                 inputTypes.toArray(), outputTypes.toArray());
     }
 
-    public void run(int... dimensions) {
-        run(cl_kernel_ptr, dimensions);
+    public void run() {
+        run(cl_kernel_ptr, runConfiguration.getDimensions(), runConfiguration.getParallelization());
     }
 
     public void syncInputsToGPU() throws Exception {
@@ -146,12 +151,16 @@ public class Stage {
         waitForQueueToFinish();
     }
 
+    public void setRunConfiguration(RunConfiguration runConfiguration) {
+        this.runConfiguration = runConfiguration;
+    }
+
     public void printSummary() throws Exception {
         Timber.i("****************************************" +
                 "****************************************");
-        Timber.i("\tSTAGE NAME: %s", name);
+        Timber.i("\t - STAGE NAME: %s", name);
         // Print inputs
-        Timber.i("\tINPUTS:");
+        Timber.i("\t - INPUTS:");
         if (inputs == null) {
             Timber.i("\t\t no inputs");
         } else {
@@ -162,7 +171,7 @@ public class Stage {
             }
         }
         // Print outputs
-        Timber.i("\tOUTPUTS:");
+        Timber.i("\t - OUTPUTS:");
         if (outputs == null) {
             Timber.i("\t\t no outputs");
         } else {
@@ -173,7 +182,7 @@ public class Stage {
             }
         }
         // Print kernel
-        Timber.i("\tKERNEL:");
+        Timber.i("\t - KERNEL:");
         if (kernelSource == null) {
             Timber.i("\t\t no kernel defined");
         } else {
@@ -185,6 +194,10 @@ public class Stage {
             Timber.i("----------------------------------------" +
                     "----------------------------------------");
         }
+
+        Timber.i("\t - RUN CONFIGURATION:\n");
+        Timber.i("\t\t%s", runConfiguration.getDimensionsAsString());
+        Timber.i("\t\t%s", runConfiguration.getParallelizationAsString());
         Timber.i("****************************************" +
                 "****************************************");
     }
