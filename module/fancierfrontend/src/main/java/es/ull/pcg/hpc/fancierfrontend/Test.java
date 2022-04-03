@@ -25,26 +25,22 @@ public class Test {
         byte[] output = new byte[size];
         for (int i = 0; i < input.length; i++) {
             input[i] = (byte) i;
-            output[i] = (byte) i;
         }
-        Stage stage = new Stage("test_stage");
         try {
-            stage.setKernelSource("""
-    output[d0] = output[d0] * kConstant;
-            """);
             // Initialization
-            Map<String, Object> inputs = Map.of("output", output, "kConstant", kConstant);
-            Map<String, Object> outputs = Map.of("output", output);
-            stage.setInputs(inputs);
-            stage.setOutputs(outputs);
+            Stage stage = new Stage("test_stage");
+            stage.setKernelSource("""
+    output[d0] = input[d0] * kConstant;
+            """);
+            stage.setInputs(Map.of("input", input, "kConstant", kConstant));
+            stage.setOutputs(Map.of("output", output));
             stage.setRunConfiguration(new RunConfiguration(new long[]{size}, new long[]{size}));
+
+            // Show information
             stage.printSummary();
-            stage.prepare();
+
             // Run
-            stage.syncInputsToGPU();
-            stage.run();
-            stage.waitUntilExecutionEnds();
-            stage.syncOutputsToCPU();
+            stage.runSync();
 
             Timber.d("Execution finished");
             output = (byte[]) stage.getParameter("output");

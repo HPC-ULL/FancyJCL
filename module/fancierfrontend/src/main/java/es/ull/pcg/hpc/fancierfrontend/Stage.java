@@ -141,7 +141,7 @@ public class Stage {
      *
      * @throws Exception the exception
      */
-    public void prepare() throws Exception {
+    private void prepare() throws Exception {
         // Compile and set arguments kernel
         prepare(generateKernel(), kernelName, getOrderedParameterNames(), getOrderedParameters(),
                 getOrderedParameterTypes());
@@ -149,6 +149,12 @@ public class Stage {
 
     public void run() {
         run(cl_kernel_ptr, runConfiguration.getDimensions(), runConfiguration.getParallelization());
+    }
+
+    public void runSync() throws Exception {
+        syncInputsToGPU();
+        run(cl_kernel_ptr, runConfiguration.getDimensions(), runConfiguration.getParallelization());
+        syncOutputsToCPU();
     }
 
     public void syncInputsToGPU() throws Exception {
@@ -171,8 +177,9 @@ public class Stage {
         waitForQueueToFinish();
     }
 
-    public void setRunConfiguration(RunConfiguration runConfiguration) {
+    public void setRunConfiguration(RunConfiguration runConfiguration) throws Exception {
         this.runConfiguration = runConfiguration;
+        prepare();
     }
 
     public void printSummary() throws Exception {
