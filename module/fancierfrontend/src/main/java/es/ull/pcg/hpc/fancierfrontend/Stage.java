@@ -1,22 +1,18 @@
 package es.ull.pcg.hpc.fancierfrontend;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import timber.log.Timber;
 
 public class Stage {
     private final String name;
     private final String kernelName;
+    private final Map<String, Parameter> parameters = new HashMap<>();
     // This attribute will be set from JNI when kernel is created in `prepare`
     public long cl_kernel_ptr;
     private String kernelSource = null;
-    private ArrayList<Object> inputs = null;
-    private ArrayList<String> inputTypes = null;
-    private ArrayList<String> inputNames = null;
-    private ArrayList<Object> outputs = null;
-    private ArrayList<String> outputTypes = null;
-    private ArrayList<String> outputNames = null;
     private RunConfiguration runConfiguration = null;
 
     public Stage(String name) {
@@ -24,8 +20,9 @@ public class Stage {
         this.kernelName = name;
     }
 
-    private native long prepare(String kernel_source, String kernel_name, Object[] inputs,
-                                Object[] outputs, Object[] input_types, Object[] output_types);
+    private native long prepare(String kernel_source, String kernel_name,
+                                Object[] parameter_names, Object[] parameters,
+                                Object[] parameter_types);
 
     private native long run(long cl_kernel_ptr, long[] dimensions, long[] parallelization);
 
@@ -37,21 +34,22 @@ public class Stage {
 
     private String generateKernel() throws Exception {
         String signature = "kernel void " + name + "(";
-        for (int i = 0; i < inputs.size(); i++) {
-            if (FancierConverter.isBasicType(inputs.get(i))) {
-                signature += "const " + FancierConverter.getOCLType(inputs.get(i)) + " " + inputNames.get(i);
+        String[] names = getOrderedParameterNames();
+        for (int i = 0; i < names.length; i++) {
+            String name = names[i];
+            String oclType = FancierConverter.getOCLType(parameters.get(name).data);
+            if (FancierConverter.isBasicType(parameters.get(name).data)) {
+                signature += "const " + oclType + " " + name;
+            } else if (parameters.get(names[i]).parameterClass == ParameterClass.INPUT) {
+                signature += "global const " + oclType + " " + name;
             } else {
-                signature += "global const " + FancierConverter.getOCLType(inputs.get(i)) + " " + inputNames.get(i);
+                signature += "global " + oclType + " " + name;
             }
-            signature += ", ";
-        }
-        for (int i = 0; i < outputs.size(); i++) {
-            signature += "global " + FancierConverter.getOCLType(outputs.get(i)) + " " + outputNames.get(i);
-            if (i < (outputs.size() - 1))
+            if (i < (parameters.size() - 1)) {
                 signature += ", ";
-            else
-                signature += ") {\n";
+            }
         }
+        signature += ") {\n";
         String kernelEnd = "\n}\n";
         String modifiedKernelSource = kernelSource;
         // Shorthand for global id (dimensions) d0, d1, ... d9
@@ -62,62 +60,79 @@ public class Stage {
         return signature + modifiedKernelSource + kernelEnd;
     }
 
-    public void setInputs(Object... inputElements) throws Exception {
-        inputs = new ArrayList<>();
-        inputTypes = new ArrayList<>();
+    public void setInputs(Map<String, Object> inputElements) throws Exception {
+        int idx = 0;
         // Make the inputs fancier
-        for (Object input : inputElements) {
+        for (Map.Entry<String, Object> entry : inputElements.entrySet()) {
+            String name = entry.getKey();
+            Object input = entry.getValue();
             Object converted = FancierConverter.convert(input);
-            inputs.add(converted);
-            inputTypes.add(FancierConverter.getType(converted));
-        }
-        if (inputNames == null) {
-            generateInputNames();
+            parameters.put(name, new Parameter(ParameterClass.INPUT, converted,
+                    FancierConverter.getType(converted), idx));
+            idx += 1;
         }
     }
 
-    public void setOutputs(Object... outputElements) throws Exception {
-        outputs = new ArrayList<>();
-        outputTypes = new ArrayList<>();
+    public void setOutputs(Map<String, Object> outputElements) throws Exception {
+        int idx = parameters.size();
         // Make the outputs fancier
-        for (Object output : outputElements) {
+        for (Map.Entry<String, Object> entry : outputElements.entrySet()) {
+            String name = entry.getKey();
+            Object output = entry.getValue();
+            // Check that the output is not an input (in-place operation)
+            if (parameters.containsKey(name)) {
+                parameters.get(name).parameterClass = ParameterClass.INPUTOUTPUT;
+                continue;
+            }
             Object converted = FancierConverter.convert(output);
-            outputs.add(converted);
-            outputTypes.add(FancierConverter.getType(converted));
-        }
-        if (outputNames == null) {
-            generateOutputNames();
+            parameters.put(name, new Parameter(ParameterClass.OUTPUT, converted,
+                    FancierConverter.getType(converted), idx));
+            idx += 1;
         }
     }
 
-    public Object getOutput(int index) throws Exception {
-        return FancierConverter.getArray(outputs.get(index));
+    public Object getParameter(String name) throws Exception {
+        return FancierConverter.getArray(parameters.get(name).data);
     }
 
-    private void generateInputNames() {
-        inputNames = new ArrayList<>();
-        for (int i = 0; i < inputs.size(); i++) {
-            inputNames.add("input_" + Integer.valueOf(i).toString());
+    private String[] getOrderedParameterNames() {
+        ArrayList<String> parameterNames = new ArrayList<>();
+        for (int i = 0; i < parameters.size(); i++) {
+            for (Map.Entry<String, Parameter> entry : parameters.entrySet()) {
+                if (entry.getValue().index == i) {
+                    parameterNames.add(entry.getKey());
+                }
+            }
         }
+        String[] array = new String[parameterNames.size()];
+        parameterNames.toArray(array);
+        return array;
     }
 
-    private void generateOutputNames() {
-        outputNames = new ArrayList<>();
-        for (int i = 0; i < outputs.size(); i++) {
-            outputNames.add("output_" + Integer.valueOf(i).toString());
+    private Object[] getOrderedParameters() {
+        ArrayList<Object> parameterData = new ArrayList<>();
+        for (int i = 0; i < parameters.size(); i++) {
+            for (Map.Entry<String, Parameter> entry : parameters.entrySet()) {
+                if (entry.getValue().index == i) {
+                    parameterData.add(entry.getValue().data);
+                }
+            }
         }
+        return parameterData.toArray();
     }
 
-    public void setInputNames(String... names) {
-        inputNames = null;
-        inputNames = new ArrayList<>();
-        Collections.addAll(inputNames, names);
-    }
-
-    public void setOutputNames(String... names) {
-        outputNames = null;
-        outputNames = new ArrayList<>();
-        Collections.addAll(outputNames, names);
+    private String[] getOrderedParameterTypes() {
+        ArrayList<String> parameterTypes = new ArrayList<>();
+        for (int i = 0; i < parameters.size(); i++) {
+            for (Map.Entry<String, Parameter> entry : parameters.entrySet()) {
+                if (entry.getValue().index == i) {
+                    parameterTypes.add(entry.getValue().type);
+                }
+            }
+        }
+        String[] array = new String[parameterTypes.size()];
+        parameterTypes.toArray(array);
+        return array;
     }
 
     /**
@@ -128,11 +143,8 @@ public class Stage {
      */
     public void prepare() throws Exception {
         // Compile and set arguments kernel
-        if (!(kernelSource != null && inputs != null && outputs != null && inputNames != null && outputNames != null)) {
-            throw new Exception("Input or output parameters are not defined yet.");
-        }
-        prepare(generateKernel(), kernelName, inputs.toArray(), outputs.toArray(),
-                inputTypes.toArray(), outputTypes.toArray());
+        prepare(generateKernel(), kernelName, getOrderedParameterNames(), getOrderedParameters(),
+                getOrderedParameterTypes());
     }
 
     public void run() {
@@ -140,14 +152,18 @@ public class Stage {
     }
 
     public void syncInputsToGPU() throws Exception {
-        for (Object input : inputs) {
-            FancierConverter.syncToOCL(input);
+        for (Parameter param : parameters.values()) {
+            if (param.parameterClass == ParameterClass.INPUT || param.parameterClass == ParameterClass.INPUTOUTPUT) {
+                FancierConverter.syncToOCL(param.data);
+            }
         }
     }
 
     public void syncOutputsToCPU() throws Exception {
-        for (Object output : outputs) {
-            FancierConverter.syncToNative(output);
+        for (Parameter param : parameters.values()) {
+            if (param.parameterClass == ParameterClass.OUTPUT || param.parameterClass == ParameterClass.INPUTOUTPUT) {
+                FancierConverter.syncToNative(param.data);
+            }
         }
     }
 
@@ -164,35 +180,22 @@ public class Stage {
                 "****************************************");
         Timber.i("\t - STAGE NAME: %s", name);
         // Print inputs
-        Timber.i("\t - INPUTS:");
-        if (inputs == null) {
-            Timber.i("\t\t no inputs");
-        } else {
-            for (int i = 0; i < inputs.size(); i++) {
-                long size = FancierConverter.getSize(inputs.get(i));
-                if (size != 0) {
-                    Timber.i("\t\t%d: \"%s\" (%s)[%d]", i, inputNames.get(i),
-                            inputTypes.get(i), size);
-                } else {
-                    Timber.i("\t\t%d: \"%s\" (%s)", i, inputNames.get(i),
-                            inputTypes.get(i));
-                }
-            }
-        }
-        // Print outputs
-        Timber.i("\t - OUTPUTS:");
-        if (outputs == null) {
-            Timber.i("\t\t no outputs");
-        } else {
-            for (int i = 0; i < outputs.size(); i++) {
-                long size = FancierConverter.getSize(outputs.get(i));
-                if (size != 0) {
-                    Timber.i("\t\t%d: \"%s\" (%s)[%d]", i, outputNames.get(i),
-                            outputTypes.get(i), size);
-                } else {
-                    Timber.i("\t\t%d: \"%s\" (%s)", i, outputNames.get(i),
-                            outputTypes.get(i));
-                }
+        Timber.i("\t - PARAMETERS:");
+        for (Map.Entry<String, Parameter> param : parameters.entrySet()) {
+            long size = FancierConverter.getSize(param.getValue().data);
+            String pclass = "INPUT";
+            if (param.getValue().parameterClass == ParameterClass.INPUTOUTPUT)
+                pclass = "INPUTOUTPUT";
+            else if (param.getValue().parameterClass == ParameterClass.OUTPUT)
+                pclass = "OUTPUT";
+
+            if (size != 0) {
+                Timber.i("\t\t%d: [%s] \"%s\" (%s)[%d]", param.getValue().index, pclass,
+                        param.getKey(),
+                        param.getValue().type, size);
+            } else {
+                Timber.i("\t\t%d: [%s]\"%s\" (%s)", param.getValue().index, pclass, param.getKey(),
+                        param.getValue().type);
             }
         }
         // Print kernel

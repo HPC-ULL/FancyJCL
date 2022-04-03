@@ -57,10 +57,9 @@ int set_ocl_parameter(JNIEnv *env, jobject jobj, jstring jtype, cl_uint index, c
 extern "C"
 JNIEXPORT  jlong JNICALL
 Java_es_ull_pcg_hpc_fancierfrontend_Stage_prepare(JNIEnv *env, jobject thiz, jstring kernel_source,
-                                                  jstring kernel_name, jobjectArray inputs,
-                                                  jobjectArray outputs,
-                                                  jobjectArray input_types,
-                                                  jobjectArray output_types) {
+                                                  jstring kernel_name, jobjectArray parameter_names,
+                                                  jobjectArray parameters,
+                                                  jobjectArray parameter_types) {
     // Get the kernel and name into a C char *
     const char *kernel_source_c = env->GetStringUTFChars(kernel_source, nullptr);
     const char *kernel_name_c = env->GetStringUTFChars(kernel_name, nullptr);
@@ -73,17 +72,10 @@ Java_es_ull_pcg_hpc_fancierfrontend_Stage_prepare(JNIEnv *env, jobject thiz, jst
     FC_EXCEPTION_HANDLE_ERROR(env, err, "clCreateKernel", JNI_FALSE);
 
     // Parameter setting
-    for (cl_uint i = 0; i < env->GetArrayLength(inputs); i++) {
-        auto jtype = (jstring) env->GetObjectArrayElement(input_types, i);
-        auto jobj = (jobject) env->GetObjectArrayElement(inputs, i);
+    for (cl_uint i = 0; i < env->GetArrayLength(parameter_names); i++) {
+        auto jtype = (jstring) env->GetObjectArrayElement(parameter_types, i);
+        auto jobj = (jobject) env->GetObjectArrayElement(parameters, i);
         set_ocl_parameter(env, jobj, jtype, i, kernel);
-    }
-
-    for (cl_uint i = 0; i < env->GetArrayLength(outputs); i++) {
-        int idx = i + env->GetArrayLength(inputs);
-        auto jtype = (jstring) env->GetObjectArrayElement(output_types, i);
-        auto jobj = (jobject) env->GetObjectArrayElement(outputs, i);
-        set_ocl_parameter(env, jobj, jtype, idx, kernel);
     }
 
     // Release mem
