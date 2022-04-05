@@ -20,15 +20,16 @@ public class Example3_Bitmap {
     @RequiresApi(api = Build.VERSION_CODES.R)
     public static void run(Context ctx) {
         FancierManager.initialize(ctx.getCacheDir().getAbsolutePath());
-        Bitmap img = BitmapFactory.decodeResource(ctx.getResources(), R.drawable.lenna_512);
-        MainActivity.setImgBefore(img);
+        Bitmap imgIn = BitmapFactory.decodeResource(ctx.getResources(), R.drawable.lenna_512);
+        Bitmap imgOut = Bitmap.createBitmap(512, 512, Bitmap.Config.ARGB_8888);
+        MainActivity.setImgBefore(imgIn);
         try {
-            Stage stage = new Stage("test_stage");
+            Stage stage = new Stage();
             stage.setKernelSource("""
-                    img[d0] = img[d0] + (uchar4)(100, 0, 0, 0);
+                    img_out[d0] = img_in[d0] + (uchar4)(100, 0, 0, 0);
                             """);
-            stage.setInputs(Map.of("img", img));
-            stage.setOutputs(Map.of("img", img));
+            stage.setInputs(Map.of("img_in", imgIn));
+            stage.setOutputs(Map.of("img_out", imgOut));
             stage.setRunConfiguration(new RunConfiguration(new long[]{512 * 512}, new long[]{1}));
 
             // Show information
@@ -36,10 +37,9 @@ public class Example3_Bitmap {
 
             // Run
             stage.runSync();
-
             Timber.d("Execution finished");
-            Bitmap img2 = (Bitmap) stage.getParameter("img");
-            MainActivity.setImgAfter(img2);
+
+            MainActivity.setImgAfter(imgOut);
         } catch (Exception e) {
             Timber.e(e);
         }

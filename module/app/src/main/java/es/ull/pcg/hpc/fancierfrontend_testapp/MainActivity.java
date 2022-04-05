@@ -10,6 +10,11 @@ import android.widget.ImageView;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.lang.reflect.Executable;
+import java.util.concurrent.Executors;
+
+import es.ull.pcg.hpc.fancierfrontend_testapp.examples.Example1_Basic;
+import es.ull.pcg.hpc.fancierfrontend_testapp.examples.Example2_InPlace;
 import es.ull.pcg.hpc.fancierfrontend_testapp.examples.Example3_Bitmap;
 import timber.log.Timber;
 
@@ -39,9 +44,9 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         imageViewBefore = findViewById(R.id.imgBefore);
         imageViewAfter = findViewById(R.id.imgAfter);
-        AsyncTask.execute(() -> {
-//            Example1_Basic.run(ctx);
-//            Example2_InPlace.run(ctx);
+        Executors.newSingleThreadExecutor().execute(() -> {
+            Example1_Basic.run(ctx);
+            Example2_InPlace.run(ctx);
             Example3_Bitmap.run(ctx);
         });
     }

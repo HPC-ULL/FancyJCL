@@ -1,6 +1,9 @@
 package es.ull.pcg.hpc.fancierfrontend_testapp.examples;
 
 import android.content.Context;
+import android.os.Build;
+
+import androidx.annotation.RequiresApi;
 
 import java.util.Map;
 
@@ -10,6 +13,7 @@ import es.ull.pcg.hpc.fancierfrontend.Stage;
 import timber.log.Timber;
 
 public class Example1_Basic {
+    @RequiresApi(api = Build.VERSION_CODES.R)
     public static void run(Context ctx) {
         FancierManager.initialize(ctx.getCacheDir().getAbsolutePath());
 
@@ -24,7 +28,7 @@ public class Example1_Basic {
         }
         try {
             // Initialization
-            Stage stage = new Stage("test_stage");
+            Stage stage = new Stage();
             stage.setKernelSource("""
     output[d0] = input[d0] * kConstant;
             """);
@@ -39,7 +43,6 @@ public class Example1_Basic {
             stage.runSync();
 
             Timber.d("Execution finished");
-            output = (byte[]) stage.getParameter("output");
 
             // Check the results
             for (int i = 0; i < output.length; i++) {

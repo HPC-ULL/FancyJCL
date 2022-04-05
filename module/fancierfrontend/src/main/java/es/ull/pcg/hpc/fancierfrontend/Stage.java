@@ -1,9 +1,6 @@
 package es.ull.pcg.hpc.fancierfrontend;
 
 import android.graphics.Bitmap;
-import android.os.Build;
-
-import androidx.annotation.RequiresApi;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -14,7 +11,6 @@ import es.ull.pcg.hpc.fancier.image.RGBAImage;
 import timber.log.Timber;
 
 public class Stage {
-    private final String name;
     private final String kernelName;
     private final Map<String, Parameter> parameters = new HashMap<>();
     // This attribute will be set from JNI when kernel is created in `prepare`
@@ -22,9 +18,9 @@ public class Stage {
     private String kernelSource = null;
     private RunConfiguration runConfiguration = null;
 
-    public Stage(String name) {
-        this.name = name;
-        this.kernelName = name;
+    public Stage() {
+        this.kernelName = "kernel_" + FancierManager.kernelCount;
+        FancierManager.kernelCount += 1;
     }
 
     private native long prepare(String kernel_source, String kernel_name,
@@ -40,12 +36,12 @@ public class Stage {
     }
 
     private String generateKernel() throws Exception {
-        String signature = "kernel void " + name + "(";
+        String signature = "kernel void " + kernelName + "(";
         String[] names = getOrderedParameterNames();
         for (int i = 0; i < names.length; i++) {
             String name = names[i];
-            String oclType = FancierConverter.getOCLType(parameters.get(name).data);
-            if (FancierConverter.isBasicType(parameters.get(name).data)) {
+            String oclType = FancierConverter.getOCLType(parameters.get(name).fancierData);
+            if (FancierConverter.isBasicType(parameters.get(name).fancierData)) {
                 signature += "const " + oclType + " " + name;
             } else if (parameters.get(names[i]).parameterClass == ParameterClass.INPUT) {
                 signature += "global const " + oclType + " " + name;
@@ -72,10 +68,10 @@ public class Stage {
         // Make the inputs fancier
         for (Map.Entry<String, Object> entry : inputElements.entrySet()) {
             String name = entry.getKey();
-            Object input = entry.getValue();
-            Object converted = FancierConverter.convert(input);
-            String type = FancierConverter.getType(converted);
-            parameters.put(name, new Parameter(ParameterClass.INPUT, converted, type, idx));
+            Object javaData = entry.getValue();
+            Object fancierData = FancierConverter.convert(javaData);
+            String type = FancierConverter.getType(fancierData);
+            parameters.put(name, new Parameter(ParameterClass.INPUT, javaData, fancierData, type, idx));
             idx += 1;
         }
     }
@@ -85,29 +81,17 @@ public class Stage {
         // Make the outputs fancier
         for (Map.Entry<String, Object> entry : outputElements.entrySet()) {
             String name = entry.getKey();
-            Object output = entry.getValue();
+            Object javaData = entry.getValue();
             // Check that the output is not an input (in-place operation)
             if (parameters.containsKey(name)) {
                 parameters.get(name).parameterClass = ParameterClass.INPUTOUTPUT;
                 continue;
             }
-            Object converted = FancierConverter.convert(output);
-            String type = FancierConverter.getType(converted);
-            parameters.put(name, new Parameter(ParameterClass.OUTPUT, converted, type, idx));
+            Object fancierData = FancierConverter.convert(javaData);
+            String type = FancierConverter.getType(fancierData);
+            parameters.put(name, new Parameter(ParameterClass.OUTPUT, javaData, fancierData, type, idx));
             idx += 1;
         }
-    }
-
-    public Object getParameter(String name) throws Exception {
-        if (parameters.get(name).type.equals("RGBAImage")) {
-            RGBAImage fancierData = ((RGBAImage) parameters.get(name).data);
-            ByteBuffer bb = fancierData.getBuffer();
-            Bitmap bitmap = Bitmap.createBitmap(fancierData.getWidth(), fancierData.getHeight(),
-                    Bitmap.Config.ARGB_8888);
-            bitmap.copyPixelsFromBuffer(bb);
-            return bitmap;
-        }
-        return FancierConverter.getArray(parameters.get(name).data);
     }
 
     private String[] getOrderedParameterNames() {
@@ -129,7 +113,7 @@ public class Stage {
         for (int i = 0; i < parameters.size(); i++) {
             for (Map.Entry<String, Parameter> entry : parameters.entrySet()) {
                 if (entry.getValue().index == i) {
-                    parameterData.add(entry.getValue().data);
+                    parameterData.add(entry.getValue().fancierData);
                 }
             }
         }
@@ -176,7 +160,7 @@ public class Stage {
     public void syncInputsToGPU() throws Exception {
         for (Parameter param : parameters.values()) {
             if (param.parameterClass == ParameterClass.INPUT || param.parameterClass == ParameterClass.INPUTOUTPUT) {
-                FancierConverter.syncToOCL(param.data);
+                FancierConverter.syncToOCL(param.fancierData);
             }
         }
     }
@@ -184,7 +168,8 @@ public class Stage {
     public void syncOutputsToCPU() throws Exception {
         for (Parameter param : parameters.values()) {
             if (param.parameterClass == ParameterClass.OUTPUT || param.parameterClass == ParameterClass.INPUTOUTPUT) {
-                FancierConverter.syncToNative(param.data);
+                FancierConverter.syncToNative(param.fancierData);
+                param.syncToJava();
             }
         }
     }
@@ -201,11 +186,11 @@ public class Stage {
     public void printSummary() throws Exception {
         Timber.i("****************************************" +
                 "****************************************");
-        Timber.i("\t - STAGE NAME: %s", name);
+        Timber.i("\t - STAGE NAME: %s", kernelName);
         // Print inputs
         Timber.i("\t - PARAMETERS:");
         for (Map.Entry<String, Parameter> param : parameters.entrySet()) {
-            long size = FancierConverter.getSize(param.getValue().data);
+            long size = FancierConverter.getSize(param.getValue().fancierData);
             String pclass = "INPUT";
             if (param.getValue().parameterClass == ParameterClass.INPUTOUTPUT)
                 pclass = "INPUTOUTPUT";
