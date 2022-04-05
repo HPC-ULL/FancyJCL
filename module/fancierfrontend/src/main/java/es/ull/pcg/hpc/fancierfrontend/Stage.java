@@ -1,9 +1,16 @@
 package es.ull.pcg.hpc.fancierfrontend;
 
+import android.graphics.Bitmap;
+import android.os.Build;
+
+import androidx.annotation.RequiresApi;
+
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import es.ull.pcg.hpc.fancier.image.RGBAImage;
 import timber.log.Timber;
 
 public class Stage {
@@ -67,8 +74,8 @@ public class Stage {
             String name = entry.getKey();
             Object input = entry.getValue();
             Object converted = FancierConverter.convert(input);
-            parameters.put(name, new Parameter(ParameterClass.INPUT, converted,
-                    FancierConverter.getType(converted), idx));
+            String type = FancierConverter.getType(converted);
+            parameters.put(name, new Parameter(ParameterClass.INPUT, converted, type, idx));
             idx += 1;
         }
     }
@@ -85,13 +92,21 @@ public class Stage {
                 continue;
             }
             Object converted = FancierConverter.convert(output);
-            parameters.put(name, new Parameter(ParameterClass.OUTPUT, converted,
-                    FancierConverter.getType(converted), idx));
+            String type = FancierConverter.getType(converted);
+            parameters.put(name, new Parameter(ParameterClass.OUTPUT, converted, type, idx));
             idx += 1;
         }
     }
 
     public Object getParameter(String name) throws Exception {
+        if (parameters.get(name).type.equals("RGBAImage")) {
+            RGBAImage fancierData = ((RGBAImage) parameters.get(name).data);
+            ByteBuffer bb = fancierData.getBuffer();
+            Bitmap bitmap = Bitmap.createBitmap(fancierData.getWidth(), fancierData.getHeight(),
+                    Bitmap.Config.ARGB_8888);
+            bitmap.copyPixelsFromBuffer(bb);
+            return bitmap;
+        }
         return FancierConverter.getArray(parameters.get(name).data);
     }
 
@@ -154,6 +169,7 @@ public class Stage {
     public void runSync() throws Exception {
         syncInputsToGPU();
         run(cl_kernel_ptr, runConfiguration.getDimensions(), runConfiguration.getParallelization());
+        waitUntilExecutionEnds();
         syncOutputsToCPU();
     }
 

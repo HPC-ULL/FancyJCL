@@ -48,6 +48,11 @@ int set_ocl_parameter(JNIEnv *env, jobject jobj, jstring jtype, cl_uint index, c
         jmethodID getVal = env->GetMethodID(cls, "doubleValue", "()D");
         double val = env->CallDoubleMethod(jobj, getVal);
         err = clSetKernelArg(kernel, index, sizeof(double), &val);
+    } else if (strcmp(type, "RGBAImage") == 0) {
+        fcRGBAImage *data = fcRGBAImage_getJava(env, jobj);
+        err = clSetKernelArg(kernel, index, sizeof(cl_mem), &data->pixels->ocl);
+    } else {
+        err = FC_EXCEPTION_BAD_PARAMETER;
     }
     FC_EXCEPTION_HANDLE_ERROR(env, err, "clSetKernelArg", JNI_FALSE);
     env->ReleaseStringUTFChars(jtype, type);
@@ -88,6 +93,7 @@ Java_es_ull_pcg_hpc_fancierfrontend_Stage_prepare(JNIEnv *env, jobject thiz, jst
     env->SetLongField(thiz, returnParam2Field, (jlong) kernel);
     return 0;
 }
+
 extern "C"
 JNIEXPORT jlong JNICALL
 Java_es_ull_pcg_hpc_fancierfrontend_Stage_run(JNIEnv *env, jobject thiz, jlong cl_kernel_ptr,

@@ -1,6 +1,7 @@
 package es.ull.pcg.hpc.fancierfrontend;
 
-import java.util.Locale;
+import android.graphics.Bitmap;
+
 import java.util.Objects;
 
 import es.ull.pcg.hpc.fancier.array.ByteArray;
@@ -8,6 +9,8 @@ import es.ull.pcg.hpc.fancier.array.DoubleArray;
 import es.ull.pcg.hpc.fancier.array.FloatArray;
 import es.ull.pcg.hpc.fancier.array.IntArray;
 import es.ull.pcg.hpc.fancier.array.ShortArray;
+import es.ull.pcg.hpc.fancier.image.RGBAImage;
+import timber.log.Timber;
 
 public class FancierConverter {
     // TODO a Base class for all fancier arrays would avoid having this class
@@ -15,6 +18,9 @@ public class FancierConverter {
     static public Object convert(Object input) throws Exception {
         // Check that class is an array
         if (!input.getClass().isArray()) {
+            if (input.getClass().getCanonicalName().equals("android.graphics.Bitmap")) {
+                return FancierConverter.convert(((Bitmap) input));
+            }
             return input;
         }
         return switch (input.getClass().getComponentType().getCanonicalName()) {
@@ -58,11 +64,12 @@ public class FancierConverter {
             case "IntArray" -> ((IntArray) input).syncToNative();
             case "FloatArray" -> ((FloatArray) input).syncToNative();
             case "DoubleArray" -> ((DoubleArray) input).syncToNative();
+            case "RGBAImage" -> ((RGBAImage) input).syncToNative();
             default -> throw new Exception("Provided parameter has an unknown type: " + input.getClass().getComponentType());
         }
     }
 
-    static public long getSize(Object input) throws Exception {
+    static public long getSize(Object input) {
         String className = input.getClass().getCanonicalName();
         if (className.contains("ByteArray"))
             return ((ByteArray) input).length();
@@ -111,8 +118,12 @@ public class FancierConverter {
     static public String getOCLType(Object input) throws Exception {
         if (!isBasicType(input)) {
             String className = Objects.requireNonNull(input.getClass().getCanonicalName());
-            return className.replaceAll(".*[.]", "").toLowerCase(Locale.ROOT).replace("array",
-                    "*").replace("byte", "char");
+            className = className.replaceAll(".*[.]", ""); // Remove
+            className = className.toLowerCase();
+            className = className.replace("array", "*");
+            className = className.replace("byte", "char");
+            className = className.replace("rgbaimage", "uchar4*");
+            return className;
         }
         return FancierConverter.getType(input);
     }
@@ -136,5 +147,9 @@ public class FancierConverter {
 
     static public DoubleArray convert(double[] input) {
         return new DoubleArray(input);
+    }
+
+    static public RGBAImage convert(Bitmap input) {
+        return new RGBAImage(input);
     }
 }

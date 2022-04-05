@@ -1,7 +1,5 @@
 package es.ull.pcg.hpc.fancierfrontend;
 
-import java.util.Objects;
-
 enum ParameterClass {
     INPUT,
     INPUTOUTPUT,
