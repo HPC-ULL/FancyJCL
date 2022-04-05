@@ -1,21 +1,16 @@
 package es.ull.pcg.hpc.fancierfrontend_testapp.examples;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Build;
 
 import androidx.annotation.RequiresApi;
 
 import java.util.Map;
 
-import es.ull.pcg.hpc.fancier.array.ByteArray;
 import es.ull.pcg.hpc.fancier.array.FloatArray;
 import es.ull.pcg.hpc.fancierfrontend.FancierManager;
 import es.ull.pcg.hpc.fancierfrontend.RunConfiguration;
 import es.ull.pcg.hpc.fancierfrontend.Stage;
-import es.ull.pcg.hpc.fancierfrontend_testapp.MainActivity;
-import es.ull.pcg.hpc.fancierfrontend_testapp.R;
 import timber.log.Timber;
 
 public class Example4_FancierTypes {

@@ -17,6 +17,7 @@ import es.ull.pcg.hpc.fancierfrontend_testapp.examples.Example1_Basic;
 import es.ull.pcg.hpc.fancierfrontend_testapp.examples.Example2_InPlace;
 import es.ull.pcg.hpc.fancierfrontend_testapp.examples.Example3_Bitmap;
 import es.ull.pcg.hpc.fancierfrontend_testapp.examples.Example4_FancierTypes;
+import es.ull.pcg.hpc.fancierfrontend_testapp.examples.Example5_MultipleStages;
 import timber.log.Timber;
 
 public class MainActivity extends AppCompatActivity {
@@ -46,10 +47,11 @@ public class MainActivity extends AppCompatActivity {
         imageViewBefore = findViewById(R.id.imgBefore);
         imageViewAfter = findViewById(R.id.imgAfter);
         Executors.newSingleThreadExecutor().execute(() -> {
-            Example1_Basic.run(ctx);
-            Example2_InPlace.run(ctx);
-            Example3_Bitmap.run(ctx);
-            Example4_FancierTypes.run(ctx);
+//            Example1_Basic.run(ctx);
+//            Example2_InPlace.run(ctx);
+//            Example3_Bitmap.run(ctx);
+//            Example4_FancierTypes.run(ctx);
+            Example5_MultipleStages.run(ctx);
         });
     }
 }
