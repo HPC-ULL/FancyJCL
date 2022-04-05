@@ -16,6 +16,7 @@ import java.util.concurrent.Executors;
 import es.ull.pcg.hpc.fancierfrontend_testapp.examples.Example1_Basic;
 import es.ull.pcg.hpc.fancierfrontend_testapp.examples.Example2_InPlace;
 import es.ull.pcg.hpc.fancierfrontend_testapp.examples.Example3_Bitmap;
+import es.ull.pcg.hpc.fancierfrontend_testapp.examples.Example4_FancierTypes;
 import timber.log.Timber;
 
 public class MainActivity extends AppCompatActivity {
@@ -48,6 +49,7 @@ public class MainActivity extends AppCompatActivity {
             Example1_Basic.run(ctx);
             Example2_InPlace.run(ctx);
             Example3_Bitmap.run(ctx);
+            Example4_FancierTypes.run(ctx);
         });
     }
 }

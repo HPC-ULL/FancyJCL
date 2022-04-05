@@ -68,10 +68,16 @@ public class Stage {
         // Make the inputs fancier
         for (Map.Entry<String, Object> entry : inputElements.entrySet()) {
             String name = entry.getKey();
-            Object javaData = entry.getValue();
-            Object fancierData = FancierConverter.convert(javaData);
-            String type = FancierConverter.getType(fancierData);
-            parameters.put(name, new Parameter(ParameterClass.INPUT, javaData, fancierData, type, idx));
+            if (FancierConverter.isFancierType(entry.getValue())) {
+                Object fancierData = entry.getValue();
+                String type = FancierConverter.getType(fancierData);
+                parameters.put(name, new Parameter(ParameterClass.INPUT, null, fancierData, type, idx));
+            } else {
+                Object javaData = entry.getValue();
+                Object fancierData = FancierConverter.convert(javaData);
+                String type = FancierConverter.getType(fancierData);
+                parameters.put(name, new Parameter(ParameterClass.INPUT, javaData, fancierData, type, idx));
+            }
             idx += 1;
         }
     }
@@ -81,15 +87,21 @@ public class Stage {
         // Make the outputs fancier
         for (Map.Entry<String, Object> entry : outputElements.entrySet()) {
             String name = entry.getKey();
-            Object javaData = entry.getValue();
-            // Check that the output is not an input (in-place operation)
             if (parameters.containsKey(name)) {
                 parameters.get(name).parameterClass = ParameterClass.INPUTOUTPUT;
                 continue;
             }
-            Object fancierData = FancierConverter.convert(javaData);
-            String type = FancierConverter.getType(fancierData);
-            parameters.put(name, new Parameter(ParameterClass.OUTPUT, javaData, fancierData, type, idx));
+            if (FancierConverter.isFancierType(entry.getValue())) {
+                Object fancierData = entry.getValue();
+                String type = FancierConverter.getType(fancierData);
+                parameters.put(name, new Parameter(ParameterClass.OUTPUT, null, fancierData, type, idx));
+            } else {
+                Object javaData = entry.getValue();
+                // Check that the output is not an input (in-place operation)
+                Object fancierData = FancierConverter.convert(javaData);
+                String type = FancierConverter.getType(fancierData);
+                parameters.put(name, new Parameter(ParameterClass.OUTPUT, javaData, fancierData, type, idx));
+            }
             idx += 1;
         }
     }

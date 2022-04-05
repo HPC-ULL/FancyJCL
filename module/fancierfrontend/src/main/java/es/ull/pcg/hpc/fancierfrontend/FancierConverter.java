@@ -130,7 +130,11 @@ public class FancierConverter {
 
     static public ByteArray convert(byte[] input) {
         return new ByteArray(input);
+    }
 
+    static public boolean isFancierType(Object input) {
+        String className = Objects.requireNonNull(input.getClass().getCanonicalName());
+        return className.contains("fancier");
     }
 
     static public ShortArray convert(short[] input) {

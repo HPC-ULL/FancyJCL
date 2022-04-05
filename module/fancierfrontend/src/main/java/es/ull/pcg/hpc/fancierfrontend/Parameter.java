@@ -18,17 +18,25 @@ public class Parameter {
     String type;
     int index;
     Object javaData;
+    boolean hasJavaData;
 
     public Parameter(ParameterClass parameterClass, Object javaData, Object fancierData,
                      String type, int index) {
         this.parameterClass = parameterClass;
         this.fancierData = fancierData;
+        if (javaData == null) {
+            hasJavaData = false;
+        } else {
+            hasJavaData = true;
+        }
         this.javaData = javaData;
         this.type = type;
         this.index = index;
     }
 
     public void syncToJava() throws Exception {
+        if (!hasJavaData)
+            return;
         if (type.equals("RGBAImage")) {
             RGBAImage fancierDataImage = ((RGBAImage) fancierData);
             ByteBuffer bb = fancierDataImage.getBuffer();
