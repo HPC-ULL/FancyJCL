@@ -2,6 +2,11 @@ package es.ull.pcg.hpc.fancyjcl;
 
 import android.graphics.Bitmap;
 
+import java.nio.ByteBuffer;
+import java.nio.DoubleBuffer;
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
+import java.nio.ShortBuffer;
 import java.util.Objects;
 
 import es.ull.pcg.hpc.fancier.array.ByteArray;
@@ -10,25 +15,45 @@ import es.ull.pcg.hpc.fancier.array.FloatArray;
 import es.ull.pcg.hpc.fancier.array.IntArray;
 import es.ull.pcg.hpc.fancier.array.ShortArray;
 import es.ull.pcg.hpc.fancier.image.RGBAImage;
+import timber.log.Timber;
 
 public class FancierConverter {
     // TODO a Base class for all fancier arrays would avoid having this class
 
     static public Object convert(Object input) throws Exception {
-        // Check that class is an array
-        if (!input.getClass().isArray()) {
-            if (input.getClass().getCanonicalName().equals("android.graphics.Bitmap")) {
-                return FancierConverter.convert(((Bitmap) input));
-            }
+        // Already fancier or basic
+        if (isFancierType(input) || isBasicType(input)) {
             return input;
         }
+        // Bitmap
+        if (input.getClass().getCanonicalName().equals("android.graphics.Bitmap")) {
+            return new RGBAImage((Bitmap) input);
+        }
+        // Java buffers
+        if (input.getClass().getCanonicalName().contains("Buffer")) {
+            String className = input.getClass().getCanonicalName();
+            className = className.replaceAll(".*[.]", "");
+            className = className.replaceAll("Buffer", "");
+            className = className.replaceAll("Direct", "");
+            return switch (className.toLowerCase()) {
+                case "byte" -> new ByteArray((ByteBuffer) input);
+                case "short" -> new ShortArray((ShortBuffer) input);
+                case "int" -> new IntArray((IntBuffer) input);
+                case "float" -> new FloatArray((FloatBuffer) input);
+                case "double" -> new DoubleArray((DoubleBuffer) input);
+                default -> throw new Exception("Provided parameter has an unknown type: " +
+                        input.getClass().getComponentType());
+            };
+        }
+        // Java arrays
         return switch (input.getClass().getComponentType().getCanonicalName()) {
-            case "byte" -> FancierConverter.convert((byte[]) input);
-            case "short" -> FancierConverter.convert((short[]) input);
-            case "int" -> FancierConverter.convert((int[]) input);
-            case "float" -> FancierConverter.convert((float[]) input);
-            case "double" -> FancierConverter.convert((double[]) input);
-            default -> throw new Exception("Provided parameter has an unknown type: " + input.getClass().getComponentType());
+            case "byte" -> new ByteArray((byte[]) input);
+            case "short" -> new ShortArray((short[]) input);
+            case "int" -> new IntArray((int[]) input);
+            case "float" -> new FloatArray((float[]) input);
+            case "double" -> new DoubleArray((double[]) input);
+            default -> throw new Exception("Provided parameter has an unknown type: " +
+                    input.getClass().getComponentType());
         };
     }
 
@@ -46,25 +71,27 @@ public class FancierConverter {
     static public Object getArray(Object input) throws Exception {
         String className = FancierConverter.getType(input);
         return switch (className) {
-            case "ByteArray" -> ((ByteArray) input).getArray();
-            case "ShortArray" -> ((ShortArray) input).getArray();
-            case "IntArray" -> ((IntArray) input).getArray();
-            case "FloatArray" -> ((FloatArray) input).getArray();
-            case "DoubleArray" -> ((DoubleArray) input).getArray();
-            default -> throw new Exception("Provided parameter has an unknown type: " + input.getClass().getComponentType());
+            case "bytearray" -> ((ByteArray) input).getArray();
+            case "shortarray" -> ((ShortArray) input).getArray();
+            case "intarray" -> ((IntArray) input).getArray();
+            case "floatarray" -> ((FloatArray) input).getArray();
+            case "doublearray" -> ((DoubleArray) input).getArray();
+            default -> throw new Exception("Provided parameter has an unknown type: " +
+                    input.getClass().getComponentType());
         };
     }
 
     static public void syncToNative(Object input) throws Exception {
         String className = FancierConverter.getType(input);
         switch (className) {
-            case "ByteArray" -> ((ByteArray) input).syncToNative();
-            case "ShortArray" -> ((ShortArray) input).syncToNative();
-            case "IntArray" -> ((IntArray) input).syncToNative();
-            case "FloatArray" -> ((FloatArray) input).syncToNative();
-            case "DoubleArray" -> ((DoubleArray) input).syncToNative();
-            case "RGBAImage" -> ((RGBAImage) input).syncToNative();
-            default -> throw new Exception("Provided parameter has an unknown type: " + input.getClass().getComponentType());
+            case "bytearray" -> ((ByteArray) input).syncToNative();
+            case "shortarray" -> ((ShortArray) input).syncToNative();
+            case "intarray" -> ((IntArray) input).syncToNative();
+            case "floatarray" -> ((FloatArray) input).syncToNative();
+            case "doublearray" -> ((DoubleArray) input).syncToNative();
+            case "rgbaimage" -> ((RGBAImage) input).syncToNative();
+            default -> throw new Exception("Provided parameter has an unknown type: " +
+                    input.getClass().getCanonicalName());
         }
     }
 
@@ -80,55 +107,49 @@ public class FancierConverter {
             return ((FloatArray) input).length();
         if (className.contains("DoubleArray"))
             return ((DoubleArray) input).length();
+        if (className.contains("ByteBuffer"))
+            return ((ByteBuffer) input).capacity();
+        if (className.contains("ShortBuffer"))
+            return ((ShortBuffer) input).capacity();
+        if (className.contains("IntBuffer"))
+            return ((IntBuffer) input).capacity();
+        if (className.contains("FloatBuffer"))
+            return ((FloatBuffer) input).capacity();
+        if (className.contains("DoubleBuffer"))
+            return ((DoubleBuffer) input).capacity();
         // Basic type
         return 0;
     }
 
-    static public String getType(Object input) throws Exception {
+    static public String getType(Object input) {
         String className = input.getClass().getCanonicalName();
-        if (!isBasicType(input)) {
-            return className.replaceAll(".*[.]", "");
-        }
-        // Basic type
-        switch (className) {
-            case "java.lang.Byte" -> {
-                return "char";
-            }
-            case "java.lang.Short" -> {
-                return "short";
-            }
-            case "java.lang.Integer" -> {
-                return "int";
-            }
-            case "java.lang.Float" -> {
-                return "float";
-            }
-            case "java.lang.Double" -> {
-                return "double";
-            }
-            default -> throw new Exception("Provided parameter has an unknown type: " + className);
-        }
+        className = className.replaceAll(".*[.]", "");
+        className = className.replaceAll("\\[|\\]", "Array");
+        className = className.replaceAll("Buffer", "Array");
+        className = className.replaceAll("Direct", "");
+        className = className.replaceAll("Bitmap", "rgbaimage");
+        className = className.toLowerCase();
+        return className;
+//        return switch (className) {
+//            case "byte" -> "char";
+//            case "short" -> "short";
+//            case "integer" -> "int";
+//            case "float" -> "float";
+//            case "double" -> "double";
+//            default -> throw new Exception("Provided parameter has an unknown type: " +
+//                    input.getClass().getCanonicalName());
+//        };
     }
 
-    static public boolean isBasicType(Object input) {
-        return !input.getClass().getCanonicalName().contains("fancier");
-    }
-
-    static public String getOCLType(Object input) throws Exception {
-        if (!isBasicType(input)) {
-            String className = Objects.requireNonNull(input.getClass().getCanonicalName());
-            className = className.replaceAll(".*[.]", ""); // Remove
-            className = className.toLowerCase();
-            className = className.replace("array", "*");
-            className = className.replace("byte", "char");
-            className = className.replace("rgbaimage", "uchar4*");
-            return className;
-        }
-        return FancierConverter.getType(input);
-    }
-
-    static public ByteArray convert(byte[] input) {
-        return new ByteArray(input);
+    static public String getOCLType(Object input) {
+//        if (isFancierType(input)) {
+            String type = getType(input);
+            type = type.replace("array", "*");
+            type = type.replace("byte", "char");
+            type = type.replace("rgbaimage", "uchar4*");
+            return type;
+//        }
+//        return FancierConverter.getType(input);
     }
 
     static public boolean isFancierType(Object input) {
@@ -136,23 +157,16 @@ public class FancierConverter {
         return className.contains("fancier");
     }
 
-    static public ShortArray convert(short[] input) {
-        return new ShortArray(input);
-    }
-
-    static public IntArray convert(int[] input) {
-        return new IntArray(input);
-    }
-
-    static public FloatArray convert(float[] input) {
-        return new FloatArray(input);
-    }
-
-    static public DoubleArray convert(double[] input) {
-        return new DoubleArray(input);
-    }
-
-    static public RGBAImage convert(Bitmap input) {
-        return new RGBAImage(input);
+    public static boolean isBasicType(Object data) {
+        if (isFancierType(data))
+            return false;
+        String className = data.getClass().getCanonicalName();
+        if (className.contains("["))
+            return false;
+        if (className.contains("Buffer"))
+            return false;
+        if (className.contains("Bitmap"))
+            return false;
+        return true;
     }
 }

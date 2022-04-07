@@ -158,7 +158,7 @@ public class Stage {
                         param.name,
                         param.type, size);
             } else {
-                Timber.i("\t\t%d: [%s]\"%s\" (%s)", parameterIndex, parameterClass.toString(),
+                Timber.i("\t\t%d: [%s] \"%s\" (%s)", parameterIndex, parameterClass.toString(),
                         param.name,
                         param.type);
             }
@@ -178,8 +178,12 @@ public class Stage {
         }
 
         Timber.i("\t - RUN CONFIGURATION:\n");
-        Timber.i("\t\t%s", runConfiguration.getDimensionsAsString());
-        Timber.i("\t\t%s", runConfiguration.getParallelizationAsString());
+        if (runConfiguration != null) {
+            Timber.i("\t\t%s", runConfiguration.getDimensionsAsString());
+            Timber.i("\t\t%s", runConfiguration.getParallelizationAsString());
+        } else {
+            Timber.i("\t\t no run configuration defined");
+        }
         Timber.i("****************************************" +
                 "****************************************");
     }

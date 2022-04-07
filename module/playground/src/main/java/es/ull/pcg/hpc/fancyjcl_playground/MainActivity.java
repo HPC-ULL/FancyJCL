@@ -11,7 +11,12 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.concurrent.Executors;
 
+import es.ull.pcg.hpc.fancyjcl_playground.examples.Example1_Basic;
+import es.ull.pcg.hpc.fancyjcl_playground.examples.Example2_InPlace;
+import es.ull.pcg.hpc.fancyjcl_playground.examples.Example3_Bitmap;
+import es.ull.pcg.hpc.fancyjcl_playground.examples.Example4_FancierTypes;
 import es.ull.pcg.hpc.fancyjcl_playground.examples.Example5_MultipleStages;
+import es.ull.pcg.hpc.fancyjcl_playground.examples.Example6_Buffer;
 import timber.log.Timber;
 
 public class MainActivity extends AppCompatActivity {
@@ -45,7 +50,8 @@ public class MainActivity extends AppCompatActivity {
 //            Example2_InPlace.run(ctx);
 //            Example3_Bitmap.run(ctx);
 //            Example4_FancierTypes.run(ctx);
-            Example5_MultipleStages.run(ctx);
+//            Example5_MultipleStages.run(ctx);
+            Example6_Buffer.run(ctx);
         });
     }
 }

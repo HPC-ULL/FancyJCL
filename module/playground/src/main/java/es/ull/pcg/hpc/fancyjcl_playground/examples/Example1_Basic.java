@@ -49,7 +49,7 @@ public class Example1_Basic {
                 Timber.d("[%d]=%d", i, output[i]);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Timber.e(e);
         }
 
     }

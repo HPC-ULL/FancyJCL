@@ -8,19 +8,20 @@
 int set_ocl_parameter(JNIEnv *env, jobject jobj, jstring jtype, cl_uint index, cl_kernel kernel) {
     const char *type = env->GetStringUTFChars(jtype, nullptr);
     int err = 0;
-    if (strcmp(type, "ByteArray") == 0) {
+    LOGD("set ocl parameter %s", type);
+    if (strcmp(type, "bytearray") == 0) {
         fcByteArray *data = fcByteArray_getJava(env, jobj);
         err = clSetKernelArg(kernel, index, sizeof(cl_mem), &data->ocl);
-    } else if (strcmp(type, "ShortArray") == 0) {
+    } else if (strcmp(type, "shortarray") == 0) {
         fcShortArray *data = fcShortArray_getJava(env, jobj);
         err = clSetKernelArg(kernel, index, sizeof(cl_mem), &data->ocl);
-    } else if (strcmp(type, "IntArray") == 0) {
+    } else if (strcmp(type, "intarray") == 0) {
         fcIntArray *data = fcIntArray_getJava(env, jobj);
         err = clSetKernelArg(kernel, index, sizeof(cl_mem), &data->ocl);
-    } else if (strcmp(type, "FloatArray") == 0) {
+    } else if (strcmp(type, "floatarray") == 0) {
         fcFloatArray *data = fcFloatArray_getJava(env, jobj);
         err = clSetKernelArg(kernel, index, sizeof(cl_mem), &data->ocl);
-    } else if (strcmp(type, "DoubleArray") == 0) {
+    } else if (strcmp(type, "doublearray") == 0) {
         fcDoubleArray *data = fcDoubleArray_getJava(env, jobj);
         err = clSetKernelArg(kernel, index, sizeof(cl_mem), &data->ocl);
     } else if (strcmp(type, "char") == 0) {
@@ -48,7 +49,7 @@ int set_ocl_parameter(JNIEnv *env, jobject jobj, jstring jtype, cl_uint index, c
         jmethodID getVal = env->GetMethodID(cls, "doubleValue", "()D");
         double val = env->CallDoubleMethod(jobj, getVal);
         err = clSetKernelArg(kernel, index, sizeof(double), &val);
-    } else if (strcmp(type, "RGBAImage") == 0) {
+    } else if (strcmp(type, "rgbaimage") == 0) {
         fcRGBAImage *data = fcRGBAImage_getJava(env, jobj);
         err = clSetKernelArg(kernel, index, sizeof(cl_mem), &data->pixels->ocl);
     } else {

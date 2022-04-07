@@ -50,11 +50,7 @@ public class Parameter {
 
     public Parameter(String name, Object javaData, Object fancierData, String type) {
         this.fancierData = fancierData;
-        if (javaData == null) {
-            hasJavaData = false;
-        } else {
-            hasJavaData = true;
-        }
+        hasJavaData = javaData != null;
         this.javaData = javaData;
         this.type = type;
         this.name = name;
@@ -64,12 +60,15 @@ public class Parameter {
     public void syncToJava() throws Exception {
         if (!hasJavaData)
             return;
-        if (type.equals("RGBAImage")) {
+        if (type.equals("rgbaimage")) {
             RGBAImage fancierDataImage = ((RGBAImage) fancierData);
             ByteBuffer bb = fancierDataImage.getBuffer();
             ((Bitmap) javaData).copyPixelsFromBuffer(bb);
             return;
         }
+        // Buffers are already sync
+        if (javaData.getClass().getCanonicalName().contains("Buffer"))
+            return;
         Object jdata = FancierConverter.getArray(fancierData);
         long length = FancierConverter.getSize(fancierData);
         System.arraycopy(jdata, 0, javaData, 0, (int) length);
