@@ -19,7 +19,6 @@ import timber.log.Timber;
 public class Example3_Bitmap {
     @RequiresApi(api = Build.VERSION_CODES.R)
     public static void run(Context ctx) {
-        FancyJCLManager.initialize(ctx.getCacheDir().getAbsolutePath());
         Bitmap imgIn = BitmapFactory.decodeResource(ctx.getResources(), R.drawable.lenna_512);
         Bitmap imgOut = Bitmap.createBitmap(512, 512, Bitmap.Config.ARGB_8888);
         MainActivity.setImgBefore(imgIn);
@@ -43,6 +42,6 @@ public class Example3_Bitmap {
         } catch (Exception e) {
             Timber.e(e);
         }
-        FancyJCLManager.release();
+        FancyJCLManager.clear();
     }
 }

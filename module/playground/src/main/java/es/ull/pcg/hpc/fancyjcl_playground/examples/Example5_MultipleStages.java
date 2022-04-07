@@ -7,7 +7,6 @@ import androidx.annotation.RequiresApi;
 
 import java.util.Map;
 
-import es.ull.pcg.hpc.fancier.array.FloatArray;
 import es.ull.pcg.hpc.fancyjcl.FancyJCLManager;
 import es.ull.pcg.hpc.fancyjcl.RunConfiguration;
 import es.ull.pcg.hpc.fancyjcl.Stage;
@@ -15,8 +14,7 @@ import timber.log.Timber;
 
 public class Example5_MultipleStages {
     @RequiresApi(api = Build.VERSION_CODES.R)
-    public static void run(Context ctx) {
-        FancyJCLManager.initialize(ctx.getCacheDir().getAbsolutePath());
+    public static void run() {
         int size = 10;
         float[] array = new float[size];
         float[] aux = new float[size];
@@ -62,6 +60,6 @@ public class Example5_MultipleStages {
         } catch (Exception e) {
             Timber.e(e);
         }
-        FancyJCLManager.release();
+        FancyJCLManager.clear();
     }
 }

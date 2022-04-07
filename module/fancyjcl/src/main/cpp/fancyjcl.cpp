@@ -8,7 +8,6 @@
 int set_ocl_parameter(JNIEnv *env, jobject jobj, jstring jtype, cl_uint index, cl_kernel kernel) {
     const char *type = env->GetStringUTFChars(jtype, nullptr);
     int err = 0;
-    LOGD("set ocl parameter %s", type);
     if (strcmp(type, "bytearray") == 0) {
         fcByteArray *data = fcByteArray_getJava(env, jobj);
         err = clSetKernelArg(kernel, index, sizeof(cl_mem), &data->ocl);

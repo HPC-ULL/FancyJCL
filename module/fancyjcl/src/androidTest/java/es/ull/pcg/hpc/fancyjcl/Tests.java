@@ -10,8 +10,6 @@ import junit.framework.TestCase;
 import java.nio.ByteBuffer;
 import java.util.Map;
 
-import timber.log.Timber;
-
 public class Tests extends TestCase {
     public void testBasic() throws Exception {
         Context ctx = InstrumentationRegistry.getInstrumentation().getTargetContext();
@@ -34,7 +32,7 @@ public class Tests extends TestCase {
         for (int i = 0; i < output.length; i++) {
             assertEquals(output[i], input[i] * kConstant, 0.0f);
         }
-        FancyJCLManager.release();
+        FancyJCLManager.clear();
     }
 
     public void testInPlace() throws Exception {
@@ -60,7 +58,7 @@ public class Tests extends TestCase {
         for (int i = 0; i < data.length; i++) {
             assertEquals(data[i], outputGt[i], 0.0f);
         }
-        FancyJCLManager.release();
+        FancyJCLManager.clear();
     }
 
     public void testBitmap() throws Exception {
@@ -90,7 +88,7 @@ public class Tests extends TestCase {
                         Byte.toUnsignedInt(buffer.get((i * imgIn.getWidth() + j) * 4 + 3)), 0.0f);
             }
         }
-        FancyJCLManager.release();
+        FancyJCLManager.clear();
     }
 
     public void testMultipleStages() throws Exception {
@@ -124,7 +122,7 @@ public class Tests extends TestCase {
         for (int i = 0; i < output.length; i++) {
             assertEquals(((array[i] * array[i]) > 25.f) ? 1.0f : 0.0f, output[i], 0.0f);
         }
-        FancyJCLManager.release();
+        FancyJCLManager.clear();
     }
 
 
@@ -149,6 +147,6 @@ public class Tests extends TestCase {
         for (int i = 0; i < output.capacity(); i++) {
             assertEquals(input.get(i) * kConstant, output.get(i), 1.0f);
         }
-        FancyJCLManager.release();
+        FancyJCLManager.clear();
     }
 }

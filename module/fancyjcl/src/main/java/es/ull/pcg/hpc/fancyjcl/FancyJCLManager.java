@@ -21,12 +21,13 @@ public class FancyJCLManager {
         }
     }
 
-    public static void release() {
-        Fancier.release();
+    public static void clear() {
         parameters.clear();
-        initialized = false;
     }
 
+    public static void release() {
+        Fancier.release();
+    }
     // Adds a parameter, or a reference to the parameter.
     public static void addParameter(String stageName, String parameterName, Object data,
                                     ParameterClass parameterClass,

@@ -14,9 +14,7 @@ import timber.log.Timber;
 
 public class Example1_Basic {
     @RequiresApi(api = Build.VERSION_CODES.R)
-    public static void run(Context ctx) {
-        FancyJCLManager.initialize(ctx.getCacheDir().getAbsolutePath());
-
+    public static void run() {
         int size = 25;
         float kConstant = -2;
 
@@ -51,6 +49,6 @@ public class Example1_Basic {
         } catch (Exception e) {
             Timber.e(e);
         }
-        FancyJCLManager.release();
+        FancyJCLManager.clear();
     }
 }

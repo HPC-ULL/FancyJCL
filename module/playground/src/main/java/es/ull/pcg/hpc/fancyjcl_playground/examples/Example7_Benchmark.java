@@ -5,27 +5,25 @@ import android.os.Build;
 
 import androidx.annotation.RequiresApi;
 
-import java.nio.ByteBuffer;
 import java.util.Map;
 
+import es.ull.pcg.hpc.fancyjcl.Benchmark;
 import es.ull.pcg.hpc.fancyjcl.FancyJCLManager;
 import es.ull.pcg.hpc.fancyjcl.RunConfiguration;
 import es.ull.pcg.hpc.fancyjcl.Stage;
 import timber.log.Timber;
 
-public class Example6_Buffers {
-
+public class Example7_Benchmark {
     @RequiresApi(api = Build.VERSION_CODES.R)
     public static void run() {
-        int size = 25;
+        int size = 1080 * 1920;
         float kConstant = -2;
 
         // Have the data in java
-        ByteBuffer input = ByteBuffer.allocateDirect(size);
-        ByteBuffer output = ByteBuffer.allocateDirect(size);
-
-        for (int i = 0; i < input.capacity(); i++) {
-            input.put(i, (byte) i);
+        byte[] input = new byte[size];
+        byte[] output = new byte[size];
+        for (int i = 0; i < input.length; i++) {
+            input[i] = (byte) i;
         }
         try {
             // Initialization
@@ -35,20 +33,20 @@ public class Example6_Buffers {
                             """);
             stage.setInputs(Map.of("input", input, "kConstant", kConstant));
             stage.setOutputs(Map.of("output", output));
-            stage.setRunConfiguration(new RunConfiguration(new long[]{size}, new long[]{size}));
+            stage.setRunConfiguration(new RunConfiguration(new long[]{size}, new long[]{1024}));
 
             // Show information
             stage.printSummary();
 
             // Run
+            Benchmark.perform(() -> {
+                stage.run();
+            }, () -> {
+                stage.syncOutputsToCPU();
+            }, 10000);
             stage.runSync();
 
             Timber.d("Execution finished");
-
-            // Check the results
-            for (int i = 0; i < output.capacity(); i++) {
-                Timber.d("[%d]=%d", i, output.get(i));
-            }
         } catch (Exception e) {
             Timber.e(e);
         }
