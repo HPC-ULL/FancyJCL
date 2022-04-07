@@ -13,7 +13,7 @@ import es.ull.pcg.hpc.fancyjcl.RunConfiguration;
 import es.ull.pcg.hpc.fancyjcl.Stage;
 import timber.log.Timber;
 
-public class Example6_Buffer {
+public class Example6_Buffers {
 
     @RequiresApi(api = Build.VERSION_CODES.R)
     public static void run(Context ctx) {
@@ -54,6 +54,6 @@ public class Example6_Buffer {
         } catch (Exception e) {
             Timber.e(e);
         }
-
+        FancyJCLManager.release();
     }
 }

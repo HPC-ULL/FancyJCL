@@ -51,6 +51,6 @@ public class Example1_Basic {
         } catch (Exception e) {
             Timber.e(e);
         }
-
+        FancyJCLManager.release();
     }
 }

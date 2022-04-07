@@ -18,11 +18,11 @@ public class Example5_MultipleStages {
     public static void run(Context ctx) {
         FancyJCLManager.initialize(ctx.getCacheDir().getAbsolutePath());
         int size = 10;
-        FloatArray array = new FloatArray(size);
-        FloatArray aux = new FloatArray(size);
-        FloatArray output = new FloatArray(size);
+        float[] array = new float[size];
+        float[] aux = new float[size];
+        float[] output = new float[size];
         for (int i = 0; i < size; i++) {
-            array.set(i, (byte) i);
+            array[i] = i;
         }
         try {
             Stage power = new Stage();
@@ -57,11 +57,11 @@ public class Example5_MultipleStages {
             // Check results
 
             for (int i = 0; i < size; i++) {
-                Timber.d("out[%d]=%f", i, output.get(i));
+                Timber.d("out[%d]=%f", i, output[i]);
             }
         } catch (Exception e) {
             Timber.e(e);
         }
-
+        FancyJCLManager.release();
     }
 }

@@ -48,6 +48,6 @@ public class Example2_InPlace {
         } catch (Exception e) {
             Timber.e(e);
         }
-
+        FancyJCLManager.release();
     }
 }

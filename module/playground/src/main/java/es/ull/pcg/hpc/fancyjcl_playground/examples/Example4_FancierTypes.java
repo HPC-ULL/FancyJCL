@@ -46,6 +46,6 @@ public class Example4_FancierTypes {
         } catch (Exception e) {
             Timber.e(e);
         }
-
+        FancyJCLManager.release();
     }
 }

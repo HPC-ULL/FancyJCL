@@ -43,6 +43,6 @@ public class Example3_Bitmap {
         } catch (Exception e) {
             Timber.e(e);
         }
-
+        FancyJCLManager.release();
     }
 }
