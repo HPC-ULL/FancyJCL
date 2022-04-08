@@ -17,7 +17,7 @@ import es.ull.pcg.hpc.fancier.array.ShortArray;
 import es.ull.pcg.hpc.fancier.image.RGBAImage;
 import timber.log.Timber;
 
-public class FancierConverter {
+class FancierConverter {
 
     static public Object convert(Object input) throws Exception {
         // Already fancier or basic

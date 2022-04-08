@@ -40,7 +40,7 @@ class Reference {
     }
 }
 
-public class Parameter {
+class Parameter {
     Map<String, Reference> references; // Key is the stage where the param it is referenced from
     Object fancierData;
     String type;

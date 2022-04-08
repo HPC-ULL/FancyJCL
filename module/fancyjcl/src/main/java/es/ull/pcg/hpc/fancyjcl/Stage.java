@@ -5,13 +5,23 @@ import java.util.Map;
 
 import timber.log.Timber;
 
+/**
+ * Class representing an algorithm that has a set of parameters (inputs and outputs) and a run
+ * configuration for its accelerated execution in GPU via OpenCL.
+ */
 public class Stage {
     private final String stageName;
-    // This attribute will be set from JNI when kernel is created in `prepare`
+    /**
+     * This attribute will be set from JNI when kernel is created in `prepare`. It must be public
+     * for this reason.
+     */
     public long cl_kernel_ptr;
     private String kernelSource = null;
     private RunConfiguration runConfiguration = null;
 
+    /**
+     * Instantiates a new Stage, setting the stageName, and registering the stage in the Manager.
+     */
     public Stage() {
         this.stageName = "kernel_" + FancyJCLManager.kernelCount;
         FancyJCLManager.kernelCount += 1;
@@ -25,6 +35,14 @@ public class Stage {
 
     private native long waitForQueueToFinish();
 
+    /**
+     * Sets kernel source. The variables used inside the kernel must match those of the input and
+     * output parameters. The signature of the kernel will be automatically generated. Also there
+     * is a shorthand for variables such that {@code dn} will be converted {@code get_global_id(n)}.
+     * For more information on writing kernels check the TUTORIAL.
+     *
+     * @param kernelSource code that will be converted to OpenCL.
+     */
     public void setKernelSource(String kernelSource) {
         this.kernelSource = kernelSource;
     }
@@ -59,6 +77,43 @@ public class Stage {
         return signature + modifiedKernelSource + kernelEnd;
     }
 
+    /**
+     * Sets inputs for the Stage. Each input is an Object with a name. For example, in order to
+     * set two input parameters called input and constant, we call the method like so:
+     * <pre>{@code
+     * stage.setInputs(Map.of("input", input, "constant", constant));
+     * }</pre>
+     * <p>
+     * These kind of types are supported and will be zero-copy if initialized as DirectBuffer.
+     * <ul>
+     * <li> ByteBuffer  </li>
+     * <li> CharBuffer  </li>
+     * <li> ShortBuffer </li>
+     * <li> IntBuffer   </li>
+     * <li> FloatBuffer </li>
+     * <li> DoubleBuffer</li>
+     * </ul>
+     * Note that the endianness of the architecture must be matched. So, initialize them as follow:
+     * <pre>{@code
+     * ByteBuffer input = ByteBuffer.allocateDirect(size);
+     * input.order(ByteOrder.LITTLE_ENDIAN);
+     * }</pre>
+     *
+     * <p>
+     * These kind of types are supported but will not be zero-copy:
+     * <ul>
+     * <li> byte   []  </li>
+     * <li> char   []  </li>
+     * <li> short  []  </li>
+     * <li> int    []  </li>
+     * <li> float  []  </li>
+     * <li> double []  </li>
+     * </ul>
+     *
+     * @param inputElements A map where the key is the element name and the value is the input
+     *                      object.
+     * @throws Exception the exception
+     */
     public void setInputs(Map<String, Object> inputElements) throws Exception {
         int idx = 0;
         // Make the inputs fancier
@@ -70,6 +125,42 @@ public class Stage {
         }
     }
 
+    /**
+     * Sets outputs for the Stage. Each output is an Object with a name. For example, in order to
+     * a single output parameter called output, we call the method like so:
+     * <pre>{@code
+     * stage.setOutputs(Map.of("output", output));
+     * }</pre>
+     * <p>
+     * These kind of types are supported and will be zero-copy if initialized as DirectBuffer.
+     * <ul>
+     * <li> ByteBuffer  </li>
+     * <li> CharBuffer  </li>
+     * <li> ShortBuffer </li>
+     * <li> IntBuffer   </li>
+     * <li> FloatBuffer </li>
+     * <li> DoubleBuffer</li>
+     * </ul>
+     * Note that the endianness of the architecture must be matched. So, initialize them as follow:
+     * <pre>{@code
+     * ByteBuffer input = ByteBuffer.allocateDirect(size);
+     * input.order(ByteOrder.LITTLE_ENDIAN);
+     * }</pre>
+     *
+     * <p>
+     * These kind of types are supported but will not be zero-copy:
+     * <ul>
+     * <li> byte   []  </li>
+     * <li> char   []  </li>
+     * <li> short  []  </li>
+     * <li> int    []  </li>
+     * <li> float  []  </li>
+     * <li> double []  </li>
+     * </ul>
+     *
+     * @param outputElements the output elements
+     * @throws Exception the exception
+     */
     public void setOutputs(Map<String, Object> outputElements) throws Exception {
         ArrayList<Parameter> parameters = FancyJCLManager.getParametersForStage(stageName);
         int idx = parameters.size();
@@ -84,10 +175,7 @@ public class Stage {
 
 
     /**
-     * Prepare.
-     * Compiles the kernel and sets its parameters
-     *
-     * @throws Exception the exception
+     * Generates the OpenCL kernel, compiles it and sets its parameters.
      */
     private void prepare() throws Exception {
         // Compile and set arguments kernel
@@ -97,10 +185,23 @@ public class Stage {
                 FancyJCLManager.getOrderedParamTypes(stageName));
     }
 
+    /**
+     * Enqueues the Stage to be run using the set {@link RunConfiguration}. This method is
+     * non-blocking. <br>
+     * It is used whenever several {@link Stage}s are going to be executed sequentially. Usually
+     * all the stages of an algorithm are set to run with this method and then a call to
+     * {@link Stage#waitUntilExecutionEnds()} is placed to ensure all the stages are executed in
+     * GPU. For a blocking version of this method see {@link Stage#runSync()}.
+     */
     public void run() {
         run(cl_kernel_ptr, runConfiguration.getDimensions(), runConfiguration.getParallelization());
     }
 
+    /**
+     * Synchronizes the inputs to GPU, enqueues this {@link Stage} to be run, waits until the
+     * execution ends and synchronizes the outputs to CPU. If you are running several Stages
+     * sequentially, avoid unneeded synchronizations by calling {@link Stage#run()} instead.
+     */
     public void runSync() throws Exception {
         syncInputsToGPU();
         run(cl_kernel_ptr, runConfiguration.getDimensions(), runConfiguration.getParallelization());
@@ -108,6 +209,9 @@ public class Stage {
         syncOutputsToCPU();
     }
 
+    /**
+     * Synchronize inputs to GPU.
+     */
     public void syncInputsToGPU() throws Exception {
         ArrayList<Parameter> params = FancyJCLManager.getParametersForStage(stageName);
         for (Parameter param : params) {
@@ -119,6 +223,9 @@ public class Stage {
         }
     }
 
+    /**
+     * Synchronize outputs to cpu.
+     */
     public void syncOutputsToCPU() throws Exception {
         ArrayList<Parameter> parameters = FancyJCLManager.getParametersForStage(stageName);
         for (Parameter param : parameters) {
@@ -131,15 +238,29 @@ public class Stage {
         }
     }
 
+    /**
+     * Wait until execution ends. This is a blocking call that ensures that all enqueued Stages
+     * are finished.
+     */
     public void waitUntilExecutionEnds() {
         waitForQueueToFinish();
     }
 
+    /**
+     * Sets run configuration. See {@link RunConfiguration}.
+     *
+     * @param runConfiguration the run configuration
+     * @throws Exception the exception
+     */
     public void setRunConfiguration(RunConfiguration runConfiguration) throws Exception {
         this.runConfiguration = runConfiguration;
         prepare();
     }
 
+    /**
+     * Print a summary showing information about the parameters (inputs and outputs), generated
+     * OpenCL kernel and {@link RunConfiguration} of the {@link Stage}.
+     */
     public void printSummary() throws Exception {
         Timber.i("****************************************" +
                 "****************************************");

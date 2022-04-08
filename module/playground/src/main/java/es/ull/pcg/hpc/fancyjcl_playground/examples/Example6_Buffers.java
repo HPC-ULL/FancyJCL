@@ -6,6 +6,7 @@ import android.os.Build;
 import androidx.annotation.RequiresApi;
 
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.Map;
 
 import es.ull.pcg.hpc.fancyjcl.FancyJCLManager;
@@ -31,7 +32,7 @@ public class Example6_Buffers {
             // Initialization
             Stage stage = new Stage();
             stage.setKernelSource("""
-                    output[d0] = input[d0] * kConstant;
+                    output[d0] = input[d0] + kConstant;
                             """);
             stage.setInputs(Map.of("input", input, "kConstant", kConstant));
             stage.setOutputs(Map.of("output", output));

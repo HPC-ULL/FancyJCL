@@ -7,12 +7,25 @@ import java.util.Map;
 
 import es.ull.pcg.hpc.fancier.Fancier;
 
+/**
+ * Manages initialization and releasing of FancyJCL and controls the set of stages and its
+ * parameters.
+ */
 public class FancyJCLManager {
-    private static boolean initialized = false;
-    public static int kernelCount = 0;
     // Set of all parameters of all stages
-    public static final Map<String, Parameter> parameters = new HashMap<>();
+    private static final Map<String, Parameter> parameters = new HashMap<>();
+    static int kernelCount = 0;
+    private static boolean initialized = false;
 
+    /**
+     * Creates a context for FancyJCL. It must be called only once per execution of
+     * the application.
+     *
+     * @param basePath Cache path needed for storing temporal data. It can usually be obtained by
+     *                 calling {@code getApplicationContext().getCacheDir().getAbsolutePath()}
+     *                 from your
+     *                 MainActivity.
+     */
     public static void initialize(String basePath) {
         if (!initialized) {
             System.loadLibrary("fancyjcl");
@@ -21,17 +34,30 @@ public class FancyJCLManager {
         }
     }
 
+    /**
+     * Clears all the stages and all its parameters. It is called with {@code release()}
+     * and it would be needed if you want to test different algorithms involving a set of stages
+     * each one.
+     */
     public static void clear() {
         parameters.clear();
+        kernelCount = 0;
     }
 
+    /**
+     * Clears all the stages and all its parameters and then releases the FancyJCL
+     * context. It must be called only once per execution of the application, whenever FancyJCL
+     * is not needed anymore.
+     */
     public static void release() {
+        FancyJCLManager.clear();
         Fancier.release();
     }
+
     // Adds a parameter, or a reference to the parameter.
-    public static void addParameter(String stageName, String parameterName, Object data,
-                                    ParameterClass parameterClass,
-                                    int idx) throws Exception {
+    static void addParameter(String stageName, String parameterName, Object data,
+                             ParameterClass parameterClass,
+                             int idx) throws Exception {
         // If its already in parameters, just add a reference
         if (parameters.containsKey(parameterName)) {
             parameters.get(parameterName).addReference(stageName, parameterClass, idx);
@@ -55,7 +81,7 @@ public class FancyJCLManager {
     }
 
     // Returns ordered parameters
-    public static ArrayList<Parameter> getParametersForStage(String stageName) {
+    static ArrayList<Parameter> getParametersForStage(String stageName) {
         ArrayList<Parameter> output = new ArrayList<>();
         for (Parameter parameter : parameters.values()) {
             if (parameter.isPresentInStage(stageName)) {
@@ -69,7 +95,7 @@ public class FancyJCLManager {
         return output;
     }
 
-    public static String[] getOrderedParamNamesForStage(String stage) {
+    static String[] getOrderedParamNamesForStage(String stage) {
         ArrayList<Parameter> stageParams = FancyJCLManager.getParametersForStage(stage);
         ArrayList<String> parameterNames = new ArrayList<>();
         for (Parameter param : stageParams) {
@@ -80,7 +106,7 @@ public class FancyJCLManager {
         return array;
     }
 
-    public static Object[] getOrderedParamDataForStage(String stage) {
+    static Object[] getOrderedParamDataForStage(String stage) {
         ArrayList<Parameter> stageParams = FancyJCLManager.getParametersForStage(stage);
         ArrayList<Object> parameterData = new ArrayList<>();
         for (Parameter param : stageParams) {
@@ -89,7 +115,7 @@ public class FancyJCLManager {
         return parameterData.toArray();
     }
 
-    public static String[] getOrderedParamTypes(String stage) {
+    static String[] getOrderedParamTypes(String stage) {
         ArrayList<String> parameterTypes = new ArrayList<>();
         ArrayList<Parameter> stageParams = FancyJCLManager.getParametersForStage(stage);
         for (Parameter param : stageParams) {
@@ -100,7 +126,7 @@ public class FancyJCLManager {
         return array;
     }
 
-    public static void showDebugInfo() {
+    static void showDebugInfo() {
         for (Parameter param : parameters.values()) {
             param.showDebugInfo();
         }

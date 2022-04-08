@@ -1,23 +1,36 @@
 package es.ull.pcg.hpc.fancyjcl;
 
+/**
+ * Defines how a Stage is executed. It controls the size of each dimension of the execution, its
+ * parallelization factor per dimension and vectorization factor per dimension (not implemented
+ * yet).
+ */
 public class RunConfiguration {
     private final long[] dimensions;
     private final long[] parallelization;
 
-    public RunConfiguration(long[] dimenisons, long[] parallelization) {
-        this.dimensions = dimenisons;
+    /**
+     * Instantiates a new Run configuration. It defines how the {@code Stage} will be executed in
+     * terms of execution size, parallelization size and vectorization size (not implemented yet).
+     *
+     * @param dimensions      The size of the dimensions of the execution. It doesn't need to
+     *                        coincide with the size of the output parameters.
+     * @param parallelization The parallelization factor per dimension.
+     */
+    public RunConfiguration(long[] dimensions, long[] parallelization) {
+        this.dimensions = dimensions;
         this.parallelization = parallelization;
     }
 
-    public long[] getDimensions() {
+    long[] getDimensions() {
         return dimensions;
     }
 
-    public long[] getParallelization() {
+    long[] getParallelization() {
         return parallelization;
     }
 
-    public String getDimensionsAsString() {
+    String getDimensionsAsString() {
         String out = "Dimensions (" + dimensions.length + "):";
         for (int i = 0; i < dimensions.length - 1; i++) {
             out += dimensions[i];
@@ -27,7 +40,7 @@ public class RunConfiguration {
         return out;
     }
 
-    public String getParallelizationAsString() {
+    String getParallelizationAsString() {
         String out = "Parallelization (" + parallelization.length + "): ";
         for (int i = 0; i < parallelization.length - 1; i++) {
             out += parallelization[i];

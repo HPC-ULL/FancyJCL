@@ -2,6 +2,8 @@ plugins {
     id 'com.android.library'
 }
 apply plugin: 'com.ydq.android.gradle.native-aar.import'
+apply plugin: "com.vanniktech.android.javadoc"
+
 android {
     compileSdk 31
 
@@ -61,6 +63,12 @@ android {
             path file('src/main/cpp/CMakeLists.txt')
         }
     }
+}
+
+task publishJavadoc(type: Copy) {
+    from "${project.buildDir}/docs/javadoc/release"
+    into "${project.rootDir}/../docs/"
+    dependsOn generateJavadoc
 }
 
 dependencies {

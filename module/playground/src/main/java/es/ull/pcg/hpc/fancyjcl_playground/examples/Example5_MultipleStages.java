@@ -42,7 +42,6 @@ public class Example5_MultipleStages {
             threshold.setRunConfiguration(new RunConfiguration(new long[]{size}, new long[]{1}));
             // Show information
             threshold.printSummary();
-            FancyJCLManager.showDebugInfo();
 
             // Run
             power.syncInputsToGPU();
