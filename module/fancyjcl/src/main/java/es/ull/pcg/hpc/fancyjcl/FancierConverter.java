@@ -18,7 +18,6 @@ import es.ull.pcg.hpc.fancier.image.RGBAImage;
 import timber.log.Timber;
 
 public class FancierConverter {
-    // TODO a Base class for all fancier arrays would avoid having this class
 
     static public Object convert(Object input) throws Exception {
         // Already fancier or basic
@@ -130,26 +129,14 @@ public class FancierConverter {
         className = className.replaceAll("Bitmap", "rgbaimage");
         className = className.toLowerCase();
         return className;
-//        return switch (className) {
-//            case "byte" -> "char";
-//            case "short" -> "short";
-//            case "integer" -> "int";
-//            case "float" -> "float";
-//            case "double" -> "double";
-//            default -> throw new Exception("Provided parameter has an unknown type: " +
-//                    input.getClass().getCanonicalName());
-//        };
     }
 
     static public String getOCLType(Object input) {
-//        if (isFancierType(input)) {
-            String type = getType(input);
-            type = type.replace("array", "*");
-            type = type.replace("byte", "char");
-            type = type.replace("rgbaimage", "uchar4*");
-            return type;
-//        }
-//        return FancierConverter.getType(input);
+        String type = getType(input);
+        type = type.replace("array", "*");
+        type = type.replace("byte", "char");
+        type = type.replace("rgbaimage", "uchar4*");
+        return type;
     }
 
     static public boolean isFancierType(Object input) {

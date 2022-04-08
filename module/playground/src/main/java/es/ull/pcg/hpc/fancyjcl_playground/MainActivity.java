@@ -15,7 +15,6 @@ import es.ull.pcg.hpc.fancyjcl.FancyJCLManager;
 import es.ull.pcg.hpc.fancyjcl_playground.examples.Example1_Basic;
 import es.ull.pcg.hpc.fancyjcl_playground.examples.Example2_InPlace;
 import es.ull.pcg.hpc.fancyjcl_playground.examples.Example3_Bitmap;
-import es.ull.pcg.hpc.fancyjcl_playground.examples.Example4_FancierTypes;
 import es.ull.pcg.hpc.fancyjcl_playground.examples.Example5_MultipleStages;
 import es.ull.pcg.hpc.fancyjcl_playground.examples.Example6_Buffers;
 import es.ull.pcg.hpc.fancyjcl_playground.examples.Example7_Benchmark;
@@ -52,7 +51,6 @@ public class MainActivity extends AppCompatActivity {
             Example1_Basic.run();
             Example2_InPlace.run();
             Example3_Bitmap.run(ctx);
-            Example4_FancierTypes.run();
             Example5_MultipleStages.run();
             Example6_Buffers.run();
             Example7_Benchmark.run();
