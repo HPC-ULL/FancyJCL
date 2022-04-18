@@ -2,7 +2,6 @@ plugins {
     id 'com.android.library'
 }
 apply plugin: 'com.ydq.android.gradle.native-aar.import'
-apply plugin: "com.vanniktech.android.javadoc"
 
 android {
     compileSdk 31
@@ -67,10 +66,15 @@ android {
     }
 }
 
-task publishJavadoc(type: Copy) {
-    from "${project.buildDir}/docs/javadoc/release"
-    into "${project.rootDir}/../docs/"
-    dependsOn generateJavadoc
+task generateJavadoc(type: Javadoc) {
+    source = android.sourceSets.main.java.srcDirs
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+    android.libraryVariants.all { variant ->
+        if (variant.name == 'release') {
+            owner.classpath += variant.javaCompile.classpath
+        }
+    }
+    destinationDir = file("${project.rootDir}/../docs/")
 }
 
 dependencies {
