@@ -20,6 +20,8 @@ android {
             }
         }
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        versionCode 0
+        versionName "0.0.1"
     }
     splits {
         abi {
