@@ -1,3 +1,4 @@
 rootProject.name = "fancyjcl_module"
-include ':playground'
+if (!System.env.JITPACK)
+    include ':playground'
 include ':fancyjcl'
