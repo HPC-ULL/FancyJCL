@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="es.ull.pcg.hpc.fancyjcl_playground">
+
+    <application
+        android:allowBackup="true"
+        android:icon="@drawable/ic_logo_plain"
+        android:label="@string/app_name"
+        android:roundIcon="@drawable/ic_logo_plain"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.fancyjcl_playground">
+        <activity
+            android:name="es.ull.pcg.hpc.fancyjcl_playground.MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>

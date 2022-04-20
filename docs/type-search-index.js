@@ -1,0 +1,1 @@
+typeSearchIndex = [{"l":"All Classes and Interfaces","u":"allclasses-index.html"},{"p":"es.ull.pcg.hpc.fancyjcl","l":"Benchmark"},{"p":"es.ull.pcg.hpc.fancyjcl","l":"FancyJCLManager"},{"p":"es.ull.pcg.hpc.fancyjcl","l":"Benchmark.Process"},{"p":"es.ull.pcg.hpc.fancyjcl","l":"RunConfiguration"},{"p":"es.ull.pcg.hpc.fancyjcl","l":"Stage"}];updateSearchResults();
