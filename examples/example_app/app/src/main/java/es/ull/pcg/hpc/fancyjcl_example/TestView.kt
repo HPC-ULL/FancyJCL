@@ -6,6 +6,7 @@ import android.graphics.Bitmap
 import android.view.View
 import android.widget.AdapterView
 import android.widget.LinearLayout
+import es.ull.pcg.hpc.fancyjcl_example.filters.Convolution3x3
 import es.ull.pcg.hpc.fancyjcl_example.filters.Filter
 import es.ull.pcg.hpc.fancyjcl_example.filters.GaussianBlur
 import kotlinx.android.synthetic.main.tests_layout.view.*
@@ -36,7 +37,8 @@ class TestView(context: Context?) : LinearLayout(context) {
                 id: Long
             ) {
                 if (position == 0) {
-                    Timber.d("Gaussian selected")
+                    selectedFilter = Convolution3x3()
+                } else if (position == 1) {
                     selectedFilter = GaussianBlur()
                 }
             }
@@ -79,8 +81,8 @@ class TestView(context: Context?) : LinearLayout(context) {
                     errorTextView.text = "Accumulated error = $difference"
                     spinner.isEnabled = true
 //                    try {
-//                    val javaBmp = TestImage.bufferToBitmap(outputJava, w, h)
-//                    val jclBmp = TestImage.bufferToBitmap(outputJcl, w, h)
+//                        val javaBmp = TestImage.bufferToBitmap(outputJava, w, h)
+//                        val jclBmp = TestImage.bufferToBitmap(outputJcl, w, h)
 //                        FileOutputStream("/sdcard/dele/javaBmp.png").use { out ->
 //                            javaBmp.compress(
 //                                Bitmap.CompressFormat.PNG,
