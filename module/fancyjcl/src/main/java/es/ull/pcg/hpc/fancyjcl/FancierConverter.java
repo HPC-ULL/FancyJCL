@@ -128,6 +128,7 @@ class FancierConverter {
         className = className.replaceAll("Direct", "");
         className = className.replaceAll("Bitmap", "rgbaimage");
         className = className.toLowerCase();
+        className = className.replaceAll("integer", "int");
         return className;
     }
 

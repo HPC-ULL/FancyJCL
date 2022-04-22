@@ -15,7 +15,7 @@ public class Tests extends TestCase {
         Context ctx = InstrumentationRegistry.getInstrumentation().getTargetContext();
         FancyJCLManager.initialize(ctx.getCacheDir().getAbsolutePath());
         int size = 25;
-        float kConstant = -2;
+        short kConstant = -2;
         byte[] input = new byte[size];
         byte[] output = new byte[size];
         for (int i = 0; i < input.length; i++) {
