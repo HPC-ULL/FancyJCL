@@ -1,3 +1,20 @@
 <resources>
-    <string name="app_name">fancyjcl_example</string>
+    <string name="app_name">FancyJCL - Examples</string>
+    <string name="tests">Tests</string>
+    <string name="benchmarks">Benchmarks</string>
+    <string name="java_output">Java</string>
+    <string name="input">Input</string>
+    <string name="fancyjcl">JCL</string>
+    <string-array name="test_names">
+        <item>GaussianBlur</item>
+        <item>GaussianBlur2</item>
+        <item>GaussianBlur2</item>
+        <item>GaussianBlur2</item>
+        <item>GaussianBlur2</item>
+        <item>GaussianBlur2</item>
+        <item>GaussianBlur2</item>
+        <item>GaussianBlur2</item>
+        <item>GaussianBlur2</item>
+        <item>GaussianBlur2</item>
+    </string-array>
 </resources>
