@@ -5,10 +5,7 @@ import android.content.Context
 import android.view.View
 import android.widget.AdapterView
 import android.widget.LinearLayout
-import es.ull.pcg.hpc.fancyjcl_example.filters.Convolution3x3
-import es.ull.pcg.hpc.fancyjcl_example.filters.Filter
-import es.ull.pcg.hpc.fancyjcl_example.filters.GaussianBlur
-import es.ull.pcg.hpc.fancyjcl_example.filters.GrayScale
+import es.ull.pcg.hpc.fancyjcl_example.filters.*
 import kotlinx.android.synthetic.main.tests_layout.view.*
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -35,6 +32,8 @@ class TestView(context: Context?) : LinearLayout(context) {
                 id: Long
             ) {
                 if (position == 0) {
+                    selectedFilter = Convolution5x5()
+                } else if (position == 1) {
                     selectedFilter = GrayScale()
                 } else if (position == 1) {
                     selectedFilter = Convolution3x3()
