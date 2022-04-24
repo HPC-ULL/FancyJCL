@@ -23,7 +23,7 @@ public class Convolution3x3 extends Filter {
                 int c = d0 % 4;
                 int j = (d0 / 4) % w;
                 int i = (d0 / 4) / w;
-                if (c == 0) {
+                if (c == 3) {
                     output[d0] = input[d0] & 0xff;
                 } else {
                     float pixel = 0.0f;
@@ -67,7 +67,7 @@ public class Convolution3x3 extends Filter {
             for (int j = 0; j < w; j++) {
                 for (int c = 0; c < 4; c++) {
                     int position = (i * w + j) * 4 + c;
-                    if (c == 0) {
+                    if (c == 3) {
                         output.put(position, input.get(position));
                     } else {
                         float pixel = 0.0f;

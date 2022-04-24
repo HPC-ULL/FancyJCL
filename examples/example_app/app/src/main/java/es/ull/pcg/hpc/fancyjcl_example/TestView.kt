@@ -2,18 +2,16 @@ package es.ull.pcg.hpc.fancyjcl_example
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.Bitmap
 import android.view.View
 import android.widget.AdapterView
 import android.widget.LinearLayout
 import es.ull.pcg.hpc.fancyjcl_example.filters.Convolution3x3
 import es.ull.pcg.hpc.fancyjcl_example.filters.Filter
 import es.ull.pcg.hpc.fancyjcl_example.filters.GaussianBlur
+import es.ull.pcg.hpc.fancyjcl_example.filters.GrayScale
 import kotlinx.android.synthetic.main.tests_layout.view.*
 import kotlinx.coroutines.launch
 import timber.log.Timber
-import java.io.FileOutputStream
-import java.io.IOException
 import java.nio.ByteBuffer
 import kotlin.math.abs
 
@@ -37,8 +35,10 @@ class TestView(context: Context?) : LinearLayout(context) {
                 id: Long
             ) {
                 if (position == 0) {
-                    selectedFilter = Convolution3x3()
+                    selectedFilter = GrayScale()
                 } else if (position == 1) {
+                    selectedFilter = Convolution3x3()
+                } else if (position == 2) {
                     selectedFilter = GaussianBlur()
                 }
             }
