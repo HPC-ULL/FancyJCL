@@ -2,6 +2,7 @@ package es.ull.pcg.hpc.fancyjcl_example
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.Bitmap
 import android.view.View
 import android.widget.AdapterView
 import android.widget.LinearLayout
@@ -9,6 +10,8 @@ import es.ull.pcg.hpc.fancyjcl_example.filters.*
 import kotlinx.android.synthetic.main.tests_layout.view.*
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import java.io.FileOutputStream
+import java.io.IOException
 import java.nio.ByteBuffer
 import kotlin.math.abs
 
@@ -32,6 +35,8 @@ class TestView(context: Context?) : LinearLayout(context) {
                 id: Long
             ) {
                 if (position == 0) {
+                    selectedFilter = Bilateral()
+                } else if (position == 1) {
                     selectedFilter = Convolution5x5()
                 } else if (position == 1) {
                     selectedFilter = GrayScale()
@@ -53,13 +58,6 @@ class TestView(context: Context?) : LinearLayout(context) {
                 val w = 810
                 val h = 456
                 val input = TestImage.get(w, h)
-                // Java
-                val outputJava = ByteBuffer.allocateDirect(w * h * 4)
-                selectedFilter!!.runJavaOnce(input, outputJava, w, h)
-                MainActivity.scopeUI.launch {
-                    javaImageView.setImageBitmap(TestImage.bufferToBitmap(outputJava, w, h))
-                    javaProgressBar.visibility = GONE
-                }
                 // JCL
                 val outputJcl = ByteBuffer.allocateDirect(w * h * 4)
                 try {
@@ -71,6 +69,13 @@ class TestView(context: Context?) : LinearLayout(context) {
                     jclImageView.setImageBitmap(TestImage.bufferToBitmap(outputJcl, w, h))
                     jclProgressBar.visibility = GONE
                 }
+                // Java
+                val outputJava = ByteBuffer.allocateDirect(w * h * 4)
+                selectedFilter!!.runJavaOnce(input, outputJava, w, h)
+                MainActivity.scopeUI.launch {
+                    javaImageView.setImageBitmap(TestImage.bufferToBitmap(outputJava, w, h))
+                    javaProgressBar.visibility = GONE
+                }
                 // Check outputs difference
                 var difference = 0
                 for (i in 0 until outputJcl.capacity()) {
@@ -79,26 +84,34 @@ class TestView(context: Context?) : LinearLayout(context) {
                 MainActivity.scopeUI.launch {
                     errorTextView.text = "Accumulated error = $difference"
                     spinner.isEnabled = true
-//                    try {
-//                        val javaBmp = TestImage.bufferToBitmap(outputJava, w, h)
-//                        val jclBmp = TestImage.bufferToBitmap(outputJcl, w, h)
-//                        FileOutputStream("/sdcard/dele/javaBmp.png").use { out ->
-//                            javaBmp.compress(
-//                                Bitmap.CompressFormat.PNG,
-//                                100,
-//                                out
-//                            )
-//                        }
-//                        FileOutputStream("/sdcard/dele/jclBmp.png").use { out ->
-//                            jclBmp.compress(
-//                                Bitmap.CompressFormat.PNG,
-//                                100,
-//                                out
-//                            )
-//                        }
-//                    } catch (e: IOException) {
-//                        e.printStackTrace()
-//                    }
+                    try {
+                        val inputBmp = TestImage.bufferToBitmap(input, w, h)
+                        val javaBmp = TestImage.bufferToBitmap(outputJava, w, h)
+                        val jclBmp = TestImage.bufferToBitmap(outputJcl, w, h)
+                        FileOutputStream("/sdcard/dele/inputBmp.png").use { out ->
+                            inputBmp.compress(
+                                Bitmap.CompressFormat.PNG,
+                                100,
+                                out
+                            )
+                        }
+                        FileOutputStream("/sdcard/dele/javaBmp.png").use { out ->
+                            javaBmp.compress(
+                                Bitmap.CompressFormat.PNG,
+                                100,
+                                out
+                            )
+                        }
+                        FileOutputStream("/sdcard/dele/jclBmp.png").use { out ->
+                            jclBmp.compress(
+                                Bitmap.CompressFormat.PNG,
+                                100,
+                                out
+                            )
+                        }
+                    } catch (e: IOException) {
+                        e.printStackTrace()
+                    }
                 }
 
             }
