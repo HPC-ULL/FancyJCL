@@ -35,14 +35,16 @@ class TestView(context: Context?) : LinearLayout(context) {
                 id: Long
             ) {
                 if (position == 0) {
+                    selectedFilter = Median()
+                } else if (position == 1) {
                     selectedFilter = Bilateral()
-                } else if (position == 1) {
-                    selectedFilter = Convolution5x5()
-                } else if (position == 1) {
-                    selectedFilter = GrayScale()
-                } else if (position == 1) {
-                    selectedFilter = Convolution3x3()
                 } else if (position == 2) {
+                    selectedFilter = Convolution5x5()
+                } else if (position == 3) {
+                    selectedFilter = GrayScale()
+                } else if (position == 4) {
+                    selectedFilter = Convolution3x3()
+                } else if (position == 5) {
                     selectedFilter = GaussianBlur()
                 }
             }
