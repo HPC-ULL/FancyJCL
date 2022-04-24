@@ -35,6 +35,8 @@ class TestView(context: Context?) : LinearLayout(context) {
                 id: Long
             ) {
                 if (position == 0) {
+                    selectedFilter = Contrast()
+                } else if (position == 1) {
                     selectedFilter = Median()
                 } else if (position == 1) {
                     selectedFilter = Bilateral()
