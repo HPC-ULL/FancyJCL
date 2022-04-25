@@ -36,30 +36,33 @@ class TestView(context: Context?) : LinearLayout(context) {
             ) {
                 when (position) {
                     0 -> {
-                        selectedFilter = Levels()
+                        selectedFilter = Posterize()
                     }
                     1 -> {
-                        selectedFilter = Fisheye()
+                        selectedFilter = Levels()
                     }
                     2 -> {
-                        selectedFilter = Contrast()
+                        selectedFilter = Fisheye()
                     }
                     3 -> {
-                        selectedFilter = Median()
+                        selectedFilter = Contrast()
                     }
                     4 -> {
-                        selectedFilter = Bilateral()
+                        selectedFilter = Median()
                     }
                     5 -> {
-                        selectedFilter = Convolution5x5()
+                        selectedFilter = Bilateral()
                     }
                     6 -> {
-                        selectedFilter = GrayScale()
+                        selectedFilter = Convolution5x5()
                     }
                     7 -> {
-                        selectedFilter = Convolution3x3()
+                        selectedFilter = GrayScale()
                     }
                     8 -> {
+                        selectedFilter = Convolution3x3()
+                    }
+                    9 -> {
                         selectedFilter = GaussianBlur()
                     }
                 }
