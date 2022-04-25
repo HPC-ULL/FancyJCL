@@ -34,22 +34,34 @@ class TestView(context: Context?) : LinearLayout(context) {
                 position: Int,
                 id: Long
             ) {
-                if (position == 0) {
-                    selectedFilter = Fisheye()
-                } else if (position == 1) {
-                    selectedFilter = Contrast()
-                } else if (position == 2) {
-                    selectedFilter = Median()
-                } else if (position == 3) {
-                    selectedFilter = Bilateral()
-                } else if (position == 4) {
-                    selectedFilter = Convolution5x5()
-                } else if (position == 5) {
-                    selectedFilter = GrayScale()
-                } else if (position == 6) {
-                    selectedFilter = Convolution3x3()
-                } else if (position == 7) {
-                    selectedFilter = GaussianBlur()
+                when (position) {
+                    0 -> {
+                        selectedFilter = Levels()
+                    }
+                    1 -> {
+                        selectedFilter = Fisheye()
+                    }
+                    2 -> {
+                        selectedFilter = Contrast()
+                    }
+                    3 -> {
+                        selectedFilter = Median()
+                    }
+                    4 -> {
+                        selectedFilter = Bilateral()
+                    }
+                    5 -> {
+                        selectedFilter = Convolution5x5()
+                    }
+                    6 -> {
+                        selectedFilter = GrayScale()
+                    }
+                    7 -> {
+                        selectedFilter = Convolution3x3()
+                    }
+                    8 -> {
+                        selectedFilter = GaussianBlur()
+                    }
                 }
                 runFilter()
             }
