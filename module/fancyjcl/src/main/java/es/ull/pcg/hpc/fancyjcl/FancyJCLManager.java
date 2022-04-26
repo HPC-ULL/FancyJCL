@@ -6,6 +6,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import es.ull.pcg.hpc.fancier.Fancier;
+import es.ull.pcg.hpc.fancier.array.ByteArray;
+import es.ull.pcg.hpc.fancier.array.DoubleArray;
+import es.ull.pcg.hpc.fancier.array.FloatArray;
+import es.ull.pcg.hpc.fancier.array.IntArray;
+import es.ull.pcg.hpc.fancier.array.ShortArray;
 
 /**
  * Manages initialization and releasing of FancyJCL and controls the set of stages and its
@@ -40,6 +45,27 @@ public class FancyJCLManager {
      * each one.
      */
     public static void clear() {
+        for (Parameter parameter : parameters.values()) {
+            if (parameter.fancierData != null) {
+                if (parameter.type.equals("bytearray")) {
+                    ((ByteArray) parameter.fancierData).release();
+                }
+                if (parameter.type.equals("shortarray")) {
+                    ((ShortArray) parameter.fancierData).release();
+                }
+                if (parameter.type.equals("intarray")) {
+                    ((IntArray) parameter.fancierData).release();
+                }
+                if (parameter.type.equals("floatarray")) {
+                    ((FloatArray) parameter.fancierData).release();
+                }
+                if (parameter.type.equals("doublearray")) {
+                    ((DoubleArray) parameter.fancierData).release();
+                }
+            }
+            parameter.fancierData = null;
+            parameter.javaData = null;
+        }
         parameters.clear();
         kernelCount = 0;
     }
