@@ -39,12 +39,16 @@ public class Example7_Benchmark {
             stage.printSummary();
 
             // Run
-            Benchmark.perform(() -> {
+            float milliseconds = Benchmark.perform(() -> {
                 stage.run();
             }, () -> {
                 stage.syncOutputsToCPU();
             }, 10000);
+
             stage.runSync();
+
+            String elapsedStr = String.format("%.2f", milliseconds);
+            Timber.d("Computation time is %s milliseconds.", elapsedStr);
 
             Timber.d("Execution finished");
         } catch (Exception e) {
