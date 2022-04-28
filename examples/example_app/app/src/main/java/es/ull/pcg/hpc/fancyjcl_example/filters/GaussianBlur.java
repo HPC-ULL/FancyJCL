@@ -14,6 +14,8 @@ public class GaussianBlur extends Filter {
             0.21551899f, 0.18640801f, 0.12061129f, 0.05837343f, 0.02112909f,
             0.00571868f};
 
+    private byte [] aux = null;
+
     @Override
     public void initFancyJCL(ByteBuffer input, ByteBuffer output, int w, int h)
             throws Exception {
@@ -66,8 +68,13 @@ public class GaussianBlur extends Filter {
     }
 
     @Override
-    public void runJavaOnce(ByteBuffer input, ByteBuffer output, int w, int h) {
-        ByteBuffer aux = ByteBuffer.allocateDirect(w * h * 4);
+    public void runJavaOnce(byte [] input, byte [] output, int w, int h) {
+        if (aux == null) {
+            aux = new byte[w * h * 4];
+        }
+        if (aux.length != (w * h * 4)) {
+            aux = new byte[w * h * 4];
+        }
         // Horizontal
         for (int i = 0; i < h; i++) {
             for (int j = 0; j < w; j++) {
@@ -75,11 +82,11 @@ public class GaussianBlur extends Filter {
                     float blurredPixel = 0.0f;
                     for (int r = -BLUR_RADIUS; r <= BLUR_RADIUS; r++) {
                         int clampedJ = Math.max(Math.min(j + r, w - 1), 0);
-                        float sourcePixel = input.get((i * w + clampedJ) * 4 + c) & 0xff;
+                        float sourcePixel = input[(i * w + clampedJ) * 4 + c] & 0xff;
                         blurredPixel += sourcePixel * kernel[r + BLUR_RADIUS];
                     }
                     blurredPixel = Math.min(blurredPixel, 255.0f);
-                    aux.put((i * w + j) * 4 + c, Float.valueOf(blurredPixel).byteValue());
+                    aux[(i * w + j) * 4 + c] = Float.valueOf(blurredPixel).byteValue();
                 }
             }
         }
@@ -90,11 +97,11 @@ public class GaussianBlur extends Filter {
                     float blurredPixel = 0.0f;
                     for (int r = -BLUR_RADIUS; r <= BLUR_RADIUS; r++) {
                         int clampedI = Math.max(Math.min(i + r, h - 1), 0);
-                        float sourcePixel = aux.get((clampedI * w + j) * 4 + c) & 0xff;
+                        float sourcePixel = aux[(clampedI * w + j) * 4 + c] & 0xff;
                         blurredPixel += sourcePixel * kernel[r + BLUR_RADIUS];
                     }
                     blurredPixel = Math.min(blurredPixel, 255.0f);
-                    output.put((i * w + j) * 4 + c, (byte) blurredPixel);
+                    output[(i * w + j) * 4 + c] = (byte) blurredPixel;
                 }
             }
         }

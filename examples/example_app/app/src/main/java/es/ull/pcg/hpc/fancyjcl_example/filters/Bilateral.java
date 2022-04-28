@@ -9,7 +9,7 @@ import es.ull.pcg.hpc.fancyjcl.Stage;
 import es.ull.pcg.hpc.fancyjcl_example.MainActivity;
 
 public class Bilateral extends Filter {
-    final int RADIUS =2;
+    final int RADIUS = 2;
     final float PRESERVATION = 0.5f;
 
     @Override
@@ -19,9 +19,9 @@ public class Bilateral extends Filter {
         stage.setInputs(Map.of("input", input, "w", w, "h", h));
         stage.setOutputs(Map.of("output", output));
         stage.setKernelSource("""
-                    const int RADIUS =\040""" + RADIUS + """
-                    ;
-                    const float PRESERVATION =\040""" + PRESERVATION + """
+                const int RADIUS =\040""" + RADIUS + """
+                ;
+                const float PRESERVATION =\040""" + PRESERVATION + """
                     ;
                     int i = (int) d0 / w;
                     int j = (int) d0 % w;
@@ -66,12 +66,12 @@ public class Bilateral extends Filter {
     }
 
     @Override
-    public void runJavaOnce(ByteBuffer input, ByteBuffer output, int w, int h) {
+    public void runJavaOnce(byte[] input, byte[] output, int w, int h) {
         for (int i = 0; i < h; i++) {
             for (int j = 0; j < w; j++) {
-                float centerPixelR = ((float) (input.get((i * w + j) * 4 + 0) & 0xff)) / 255.0f;
-                float centerPixelG = ((float) (input.get((i * w + j) * 4 + 1) & 0xff)) / 255.0f;
-                float centerPixelB = ((float) (input.get((i * w + j) * 4 + 2) & 0xff)) / 255.0f;
+                float centerPixelR = ((float) (input[(i * w + j) * 4 + 0] & 0xff)) / 255.0f;
+                float centerPixelG = ((float) (input[(i * w + j) * 4 + 1] & 0xff)) / 255.0f;
+                float centerPixelB = ((float) (input[(i * w + j) * 4 + 2] & 0xff)) / 255.0f;
                 float sumR = 0.0f;
                 float sumG = 0.0f;
                 float sumB = 0.0f;
@@ -80,9 +80,9 @@ public class Bilateral extends Filter {
                     for (int rj = -RADIUS; rj <= RADIUS; rj++) {
                         int i2 = Math.min(Math.max(i + ri, 0), h - 1);
                         int j2 = Math.min(Math.max(j + rj, 0), w - 1);
-                        float pixelR = ((float) (input.get((i2 * w + j2) * 4 + 0) & 0xff)) / 255.0f;
-                        float pixelG = ((float) (input.get((i2 * w + j2) * 4 + 1) & 0xff)) / 255.0f;
-                        float pixelB = ((float) (input.get((i2 * w + j2) * 4 + 2) & 0xff)) / 255.0f;
+                        float pixelR = ((float) (input[(i2 * w + j2) * 4 + 0] & 0xff)) / 255.0f;
+                        float pixelG = ((float) (input[(i2 * w + j2) * 4 + 1] & 0xff)) / 255.0f;
+                        float pixelB = ((float) (input[(i2 * w + j2) * 4 + 2] & 0xff)) / 255.0f;
                         float diffR = centerPixelR - pixelR;
                         float diffG = centerPixelG - pixelG;
                         float diffB = centerPixelB - pixelB;
@@ -100,13 +100,13 @@ public class Bilateral extends Filter {
                         totalWeight += weight;
                     }
                 }
-                output.put((i * w + j) * 4 + 0,
-                        (byte) Math.max(Math.min((sumR * 255.0f / totalWeight), 255.0f), 0.0f));
-                output.put((i * w + j) * 4 + 1,
-                        (byte) Math.max(Math.min((sumG * 255.0f / totalWeight), 255.0f), 0.0f));
-                output.put((i * w + j) * 4 + 2,
-                        (byte) Math.max(Math.min((sumB * 255.0f / totalWeight), 255.0f), 0.0f));
-                output.put((i * w + j) * 4 + 3, input.get((i * w + j) * 4 + 3));
+                output[(i * w + j) * 4 + 0] =
+                        (byte) Math.max(Math.min((sumR * 255.0f / totalWeight), 255.0f), 0.0f);
+                output[(i * w + j) * 4 + 1] =
+                        (byte) Math.max(Math.min((sumG * 255.0f / totalWeight), 255.0f), 0.0f);
+                output[(i * w + j) * 4 + 2] =
+                        (byte) Math.max(Math.min((sumB * 255.0f / totalWeight), 255.0f), 0.0f);
+                output[(i * w + j) * 4 + 3] = input[(i * w + j) * 4 + 3];
             }
         }
     }

@@ -33,20 +33,20 @@ public class Contrast extends Filter {
     }
 
     @Override
-    public void runJavaOnce(ByteBuffer input, ByteBuffer output, int w, int h) {
+    public void runJavaOnce(byte[] input, byte[] output, int w, int h) {
         final float enhancement = 1.41421f;
         for (int i = 0; i < h; i++) {
             for (int j = 0; j < w; j++) {
                 for (int c = 0; c < 4; c++) {
                     int position = (i * w + j) * 4 + c;
                     if (c == 3) {
-                        output.put(position, input.get(position));
+                        output[position] = input[position];
                     } else {
-                        float pixel = (input.get(position) & 0xff) * enhancement +
-                                127.0f * (1 - enhancement);
+                        float pixel =
+                                (input[position] & 0xff) * enhancement + 127.0f * (1 - enhancement);
                         pixel = Math.max(pixel, 0);
                         pixel = Math.min(pixel, 255.0f);
-                        output.put(position, (byte) pixel);
+                        output[position] = (byte) pixel;
                     }
                 }
             }

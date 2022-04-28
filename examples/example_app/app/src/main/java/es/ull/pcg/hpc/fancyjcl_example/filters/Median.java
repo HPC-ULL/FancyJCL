@@ -22,9 +22,9 @@ public class Median extends Filter {
         stage.setInputs(Map.of("input", input, "w", w, "h", h));
         stage.setOutputs(Map.of("output", output));
         stage.setKernelSource("""
-                    const uchar RADIUS =\040""" + RADIUS + """
-                    ;
-                    const uchar medianPosition =\040""" + medianPosition + """
+                const uchar RADIUS =\040""" + RADIUS + """
+                ;
+                const uchar medianPosition =\040""" + medianPosition + """
                     ;
                     char accum[256] = {0};
                     int c = (int) d0 % 4;
@@ -55,21 +55,21 @@ public class Median extends Filter {
     }
 
     @Override
-    public void runJavaOnce(ByteBuffer input, ByteBuffer output, int w, int h) {
+    public void runJavaOnce(byte[] input, byte[] output, int w, int h) {
         short[] accum = new short[256];
         for (int i = 0; i < h; i++) {
             for (int j = 0; j < w; j++) {
                 for (int c = 0; c < 4; c++) {
                     int position = (i * w + j) * 4 + c;
                     if (c == 3) {
-                        output.put(position, input.get(position));
+                        output[position] = input[position];
                     } else {
                         Arrays.fill(accum, (byte) 0);
                         for (int ri = -RADIUS; ri <= RADIUS; ri++) {
                             for (int rj = -RADIUS; rj <= RADIUS; rj++) {
                                 int i2 = Math.min(Math.max(i + ri, 0), h - 1);
                                 int j2 = Math.min(Math.max(j + rj, 0), w - 1);
-                                int pixel = input.get((i2 * w + j2) * 4 + c) & 0xff;
+                                int pixel = input[(i2 * w + j2) * 4 + c] & 0xff;
                                 accum[pixel] += 1;
                             }
                         }
@@ -79,7 +79,7 @@ public class Median extends Filter {
                             count += accum[accumIdx];
                             accumIdx += 1;
                         }
-                        output.put(position, (byte) accumIdx);
+                        output[position] = (byte) accumIdx;
                     }
                 }
             }

@@ -51,37 +51,37 @@ public class Posterize extends Filter {
     }
 
     @Override
-    public void runJavaOnce(ByteBuffer input, ByteBuffer output, int w, int h) {
+    public void runJavaOnce(byte[] input, byte[] output, int w, int h) {
         for (int i = 0; i < h; i++) {
             for (int j = 0; j < w; j++) {
                 int offset = (i * w + j) * 4;
-                float R = (input.get(offset + 0) & 0xff) / 255.0f;
-                float G = (input.get(offset + 1) & 0xff) / 255.0f;
-                float B = (input.get(offset + 2) & 0xff) / 255.0f;
-                float A = input.get(offset + 3) & 0xff;
+                float R = (input[offset + 0] & 0xff) / 255.0f;
+                float G = (input[offset + 1] & 0xff) / 255.0f;
+                float B = (input[offset + 2] & 0xff) / 255.0f;
+                float A = input[offset + 3] & 0xff;
 
                 float intensity = R * 0.299f + G * 0.587f + B * 0.114f;
                 intensity = Math.max(0, intensity);
                 intensity = Math.min(255, intensity);
 
                 if (intensity <= 0.2f) { // RED
-                    output.put(offset + 0, (byte) 255);
-                    output.put(offset + 1, (byte) 0);
-                    output.put(offset + 2, (byte) 0);
+                    output[offset + 0] = (byte) 255;
+                    output[offset + 1] = (byte) 0;
+                    output[offset + 2] = (byte) 0;
                 } else if (intensity <= 0.4) { // GREEN
-                    output.put(offset + 0, (byte) 0);
-                    output.put(offset + 1, (byte) 255);
-                    output.put(offset + 2, (byte) 0);
+                    output[offset + 0] = (byte) 0;
+                    output[offset + 1] = (byte) 255;
+                    output[offset + 2] = (byte) 0;
                 } else if (intensity <= 0.8) { // BLUE
-                    output.put(offset + 0, (byte) 0);
-                    output.put(offset + 1, (byte) 0);
-                    output.put(offset + 2, (byte) 255);
+                    output[offset + 0] = (byte) 0;
+                    output[offset + 1] = (byte) 0;
+                    output[offset + 2] = (byte) 255;
                 } else { // YELLOW
-                    output.put(offset + 0, (byte) 0);
-                    output.put(offset + 1, (byte) 255);
-                    output.put(offset + 2, (byte) 255);
+                    output[offset + 0] = (byte) 0;
+                    output[offset + 1] = (byte) 255;
+                    output[offset + 2] = (byte) 255;
                 }
-                output.put(offset + 3, (byte) A);
+                output[offset + 3] = (byte) A;
             }
         }
     }

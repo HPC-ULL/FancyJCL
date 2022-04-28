@@ -21,13 +21,15 @@ class TestView(context: Context?) : LinearLayout(context) {
     private var selectedFilter: Filter? = null
     private val w = 810
     private val h = 456
-    private val input: ByteBuffer
-    private var outputJava: ByteBuffer?
+    private val inputJcl: ByteBuffer?
+    private val inputJava: ByteArray?
+    private var outputJava: ByteArray?
     private var outputJcl: ByteBuffer?
 
     init {
         MainActivity.layoutInflater.inflate(R.layout.tests_layout, this, true)
-        input = TestImage.get(w, h)
+        inputJcl = TestImage.get(w, h)
+        inputJava = inputJcl.array()
         outputJcl = null
         outputJava = null
         inputImageView.setImageBitmap(TestImage.bitmap)
@@ -73,8 +75,10 @@ class TestView(context: Context?) : LinearLayout(context) {
     private fun showDifference() {
         var difference = 0
         if (outputJcl != null && outputJava != null) {
-            for (i in 0 until outputJcl!!.capacity()) {
-                difference += abs(outputJava!![i] - outputJcl!![i])
+            outputJcl!!.rewind()
+            val outputJclArray = outputJcl!!.array()
+            for (i in 0 until outputJava!!.size) {
+                difference += abs(outputJava!![i] - outputJclArray[i])
             }
             MainActivity.scopeUI.launch {
                 errorTextView.text = "Accumulated error = $difference"
@@ -85,8 +89,8 @@ class TestView(context: Context?) : LinearLayout(context) {
 
     fun saveImages() {
         try {
-            val inputBmp = TestImage.bufferToBitmap(input, w, h)
-            val javaBmp = TestImage.bufferToBitmap(outputJava, w, h)
+            val inputBmp = TestImage.bufferToBitmap(inputJcl, w, h)
+            val javaBmp = TestImage.bufferToBitmap(ByteBuffer.wrap(outputJava), w, h)
             val jclBmp = TestImage.bufferToBitmap(outputJcl, w, h)
             FileOutputStream("/sdcard/dele/inputBmp.png").use { out ->
                 inputBmp.compress(
@@ -119,15 +123,15 @@ class TestView(context: Context?) : LinearLayout(context) {
         javaProgressBar.visibility = VISIBLE
         MainActivity.scopeBackground.launch {
             // Java
-            outputJava = ByteBuffer.allocateDirect(w * h * 4)
+            outputJava = ByteArray(w * h * 4);
             val start = System.nanoTime()
-            selectedFilter!!.runJavaOnce(input, outputJava, w, h)
+            selectedFilter!!.runJavaOnce(inputJava, outputJava, w, h)
             val end = System.nanoTime()
             val elapsed: Float = (end - start).toFloat() / 1e6f
             val elapsedStr = String.format("%.2f", elapsed)
             Timber.d("Java elapsed time is %s milliseconds.", elapsedStr)
             MainActivity.scopeUI.launch {
-                javaImageView.setImageBitmap(TestImage.bufferToBitmap(outputJava, w, h))
+                javaImageView.setImageBitmap(TestImage.bufferToBitmap(ByteBuffer.wrap(outputJava), w, h))
                 javaProgressBar.visibility = GONE
             }
             setInteraction(true)
@@ -143,7 +147,7 @@ class TestView(context: Context?) : LinearLayout(context) {
             outputJcl = ByteBuffer.allocateDirect(w * h * 4)
             try {
                 val start = System.nanoTime()
-                selectedFilter!!.runFancyJCLOnce(input, outputJcl, w, h)
+                selectedFilter!!.runFancyJCLOnce(inputJcl, outputJcl, w, h)
                 val end = System.nanoTime()
                 val elapsed: Float = (end - start).toFloat() / 1e6f
                 val elapsedStr = String.format("%.2f", elapsed)

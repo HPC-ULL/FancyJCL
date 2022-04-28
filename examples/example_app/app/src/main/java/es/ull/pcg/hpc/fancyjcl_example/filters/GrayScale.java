@@ -34,21 +34,21 @@ public class GrayScale extends Filter {
     }
 
     @Override
-    public void runJavaOnce(ByteBuffer input, ByteBuffer output, int w, int h) {
+    public void runJavaOnce(byte [] input, byte [] output, int w, int h) {
         for (int i = 0; i < h; i++) {
             for (int j = 0; j < w; j++) {
                 int pos2d = (i * w + j) * 4;
-                int r = input.get(pos2d) & 0xff;
-                int g = input.get(pos2d + 1) & 0xff;
-                int b = input.get(pos2d + 2) & 0xff;
-                int a = input.get(pos2d + 3) & 0xff;
+                int r = input[pos2d] & 0xff;
+                int g = input[pos2d + 1] & 0xff;
+                int b = input[pos2d + 2] & 0xff;
+                int a = input[pos2d + 3] & 0xff;
                 float gray = (r * 0.299f + g * 0.587f + b * 0.114f);
                 gray = Math.max(0.0f, gray);
                 gray = Math.min(255.0f, gray);
-                output.put(pos2d, (byte) gray);
-                output.put(pos2d + 1, (byte) gray);
-                output.put(pos2d + 2, (byte) gray);
-                output.put(pos2d + 3, (byte) a);
+                output[pos2d] = (byte) gray;
+                output[pos2d + 1] = (byte) gray;
+                output[pos2d + 2] = (byte) gray;
+                output[pos2d + 3] = (byte) a;
             }
         }
     }

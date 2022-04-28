@@ -57,7 +57,7 @@ public class Fisheye extends Filter {
     }
 
     @Override
-    public void runJavaOnce(ByteBuffer input, ByteBuffer output, int w, int h) {
+    public void runJavaOnce(byte[] input, byte[] output, int w, int h) {
         for (int i = 0; i < h; i++) {
             for (int j = 0; j < w; j++) {
                 float outputCoordX = ((float) j / (float) (w - 1) - 0.5f);
@@ -83,15 +83,15 @@ public class Fisheye extends Filter {
                 float slopeX = newCoordX - x0;
 
                 for (int c = 0; c < 4; c++) {
-                    float pixelY0 = (input.get((y0 * w + x0) * 4 + c) & 0xff) * (1 - slopeY) +
-                            (input.get((y1 * w + x0) * 4 + c) & 0xff) * slopeY;
-                    float pixelY1 = (input.get((y0 * w + x1) * 4 + c) & 0xff) * (1 - slopeY) +
-                            (input.get((y1 * w + x1) * 4 + c) & 0xff) * slopeY;
+                    float pixelY0 = (input[(y0 * w + x0) * 4 + c] & 0xff) * (1 - slopeY) +
+                            (input[(y1 * w + x0) * 4 + c] & 0xff) * slopeY;
+                    float pixelY1 = (input[(y0 * w + x1) * 4 + c] & 0xff) * (1 - slopeY) +
+                            (input[(y1 * w + x1) * 4 + c] & 0xff) * slopeY;
                     float pixel = pixelY0 * (1 - slopeX) + pixelY1 * slopeX;
                     pixel = Math.max(0, pixel);
                     pixel = Math.min(255, pixel);
                     int position = (i * w + j) * 4 + c;
-                    output.put(position, (byte) pixel);
+                    output[position] = (byte) pixel;
                 }
             }
         }

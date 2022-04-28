@@ -10,7 +10,7 @@ import es.ull.pcg.hpc.fancyjcl.Stage;
 public abstract class Filter {
     protected final ArrayList<Stage> jclStages = new ArrayList<>();
 
-    public float benchmarkJava(ByteBuffer input, ByteBuffer output, int w, int h, int nExecutions)
+    public float benchmarkJava(byte [] input, byte [] output, int w, int h, int nExecutions)
             throws Exception {
         return Benchmark.perform(() -> runJavaOnce(input, output, w, h), () -> {
         }, nExecutions);
@@ -40,7 +40,7 @@ public abstract class Filter {
         FancyJCLManager.clear();
     }
 
-    abstract public void runJavaOnce(ByteBuffer input, ByteBuffer output, int w, int h);
+    abstract public void runJavaOnce(byte [] input, byte [] output, int w, int h);
 
     abstract void initFancyJCL(ByteBuffer input, ByteBuffer output, int w, int h) throws Exception;
 }

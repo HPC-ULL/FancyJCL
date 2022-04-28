@@ -83,14 +83,14 @@ public class Levels extends Filter {
     }
 
     @Override
-    public void runJavaOnce(ByteBuffer input, ByteBuffer output, int w, int h) {
+    public void runJavaOnce(byte [] input, byte [] output, int w, int h) {
         for (int i = 0; i < h; i++) {
             for (int j = 0; j < w; j++) {
                 int offset = (i * w + j) * 4;
-                float R = input.get(offset + 0) & 0xff;
-                float G = input.get(offset + 1) & 0xff;
-                float B = input.get(offset + 2) & 0xff;
-                float A = input.get(offset + 3) & 0xff;
+                float R = input[offset + 0] & 0xff;
+                float G = input[offset + 1] & 0xff;
+                float B = input[offset + 2] & 0xff;
+                float A = input[offset + 3] & 0xff;
                 // Multiply by matrix
                 float outputR = R * satMatrix00 + G * satMatrix01 + B * satMatrix02;
                 float outputG = R * satMatrix10 + G * satMatrix11 + B * satMatrix12;
@@ -111,10 +111,10 @@ public class Levels extends Filter {
                 outputG = outputG * (LEVEL_WHITE_END - LEVEL_BLACK_END) + LEVEL_BLACK_END;
                 outputB = outputB * (LEVEL_WHITE_END - LEVEL_BLACK_END) + LEVEL_BLACK_END;
 
-                output.put(offset + 0, (byte) Math.max(Math.min(outputR, 255.0f), 0.0f));
-                output.put(offset + 1, (byte) Math.max(Math.min(outputG, 255.0f), 0.0f));
-                output.put(offset + 2, (byte) Math.max(Math.min(outputB, 255.0f), 0.0f));
-                output.put(offset + 3, (byte) A);
+                output[offset + 0] = (byte) Math.max(Math.min(outputR, 255.0f), 0.0f);
+                output[offset + 1] = (byte) Math.max(Math.min(outputG, 255.0f), 0.0f);
+                output[offset + 2] = (byte) Math.max(Math.min(outputB, 255.0f), 0.0f);
+                output[offset + 3] = (byte) A;
 
             }
         }

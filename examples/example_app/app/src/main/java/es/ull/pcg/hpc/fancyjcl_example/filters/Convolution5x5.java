@@ -72,13 +72,13 @@ public class Convolution5x5 extends Filter {
     }
 
     @Override
-    public void runJavaOnce(ByteBuffer input, ByteBuffer output, int w, int h) {
+    public void runJavaOnce(byte [] input, byte [] output, int w, int h) {
         for (int i = 0; i < h; i++) {
             for (int j = 0; j < w; j++) {
                 for (int c = 0; c < 4; c++) {
                     int position = (i * w + j) * 4 + c;
                     if (c == 3) {
-                        output.put(position, input.get(position));
+                        output[position] = input[position];
                     } else {
                         int j0 = Math.max(j - 2, 0);
                         int j1 = Math.max(j - 1, 0);
@@ -92,39 +92,39 @@ public class Convolution5x5 extends Filter {
 
                         float pixel = 0.0f;
 
-                        pixel += k[0] * (input.get((i0 * w + j0) * 4 + c) & 0xff);
-                        pixel += k[1] * (input.get((i0 * w + j1) * 4 + c) & 0xff);
-                        pixel += k[2] * (input.get((i0 * w + j) * 4 + c) & 0xff);
-                        pixel += k[3] * (input.get((i0 * w + j2) * 4 + c) & 0xff);
-                        pixel += k[4] * (input.get((i0 * w + j3) * 4 + c) & 0xff);
+                        pixel += k[0] * (input[(i0 * w + j0) * 4 + c] & 0xff);
+                        pixel += k[1] * (input[(i0 * w + j1) * 4 + c] & 0xff);
+                        pixel += k[2] * (input[(i0 * w + j) * 4 + c] & 0xff);
+                        pixel += k[3] * (input[(i0 * w + j2) * 4 + c] & 0xff);
+                        pixel += k[4] * (input[(i0 * w + j3) * 4 + c] & 0xff);
 
-                        pixel += k[5] * (input.get((i1 * w + j0) * 4 + c) & 0xff);
-                        pixel += k[6] * (input.get((i1 * w + j1) * 4 + c) & 0xff);
-                        pixel += k[7] * (input.get((i1 * w + j) * 4 + c) & 0xff);
-                        pixel += k[8] * (input.get((i1 * w + j2) * 4 + c) & 0xff);
-                        pixel += k[9] * (input.get((i1 * w + j3) * 4 + c) & 0xff);
+                        pixel += k[5] * (input[(i1 * w + j0) * 4 + c] & 0xff);
+                        pixel += k[6] * (input[(i1 * w + j1) * 4 + c] & 0xff);
+                        pixel += k[7] * (input[(i1 * w + j) * 4 + c] & 0xff);
+                        pixel += k[8] * (input[(i1 * w + j2) * 4 + c] & 0xff);
+                        pixel += k[9] * (input[(i1 * w + j3) * 4 + c] & 0xff);
 
-                        pixel += k[10] * (input.get((i * w + j0) * 4 + c) & 0xff);
-                        pixel += k[11] * (input.get((i * w + j1) * 4 + c) & 0xff);
-                        pixel += k[12] * (input.get(position) & 0xff);
-                        pixel += k[13] * (input.get((i * w + j2) * 4 + c) & 0xff);
-                        pixel += k[14] * (input.get((i * w + j3) * 4 + c) & 0xff);
+                        pixel += k[10] * (input[(i * w + j0) * 4 + c] & 0xff);
+                        pixel += k[11] * (input[(i * w + j1) * 4 + c] & 0xff);
+                        pixel += k[12] * (input[position] & 0xff);
+                        pixel += k[13] * (input[(i * w + j2) * 4 + c] & 0xff);
+                        pixel += k[14] * (input[(i * w + j3) * 4 + c] & 0xff);
 
-                        pixel += k[15] * (input.get((i2 * w + j0) * 4 + c) & 0xff);
-                        pixel += k[16] * (input.get((i2 * w + j1) * 4 + c) & 0xff);
-                        pixel += k[17] * (input.get((i2 * w + j) * 4 + c) & 0xff);
-                        pixel += k[18] * (input.get((i2 * w + j2) * 4 + c) & 0xff);
-                        pixel += k[19] * (input.get((i2 * w + j3) * 4 + c) & 0xff);
+                        pixel += k[15] * (input[(i2 * w + j0) * 4 + c] & 0xff);
+                        pixel += k[16] * (input[(i2 * w + j1) * 4 + c] & 0xff);
+                        pixel += k[17] * (input[(i2 * w + j) * 4 + c] & 0xff);
+                        pixel += k[18] * (input[(i2 * w + j2) * 4 + c] & 0xff);
+                        pixel += k[19] * (input[(i2 * w + j3) * 4 + c] & 0xff);
 
-                        pixel += k[20] * (input.get((i3 * w + j0) * 4 + c) & 0xff);
-                        pixel += k[21] * (input.get((i3 * w + j1) * 4 + c) & 0xff);
-                        pixel += k[22] * (input.get((i3 * w + j) * 4 + c) & 0xff);
-                        pixel += k[23] * (input.get((i3 * w + j2) * 4 + c) & 0xff);
-                        pixel += k[24] * (input.get((i3 * w + j3) * 4 + c) & 0xff);
+                        pixel += k[20] * (input[(i3 * w + j0) * 4 + c] & 0xff);
+                        pixel += k[21] * (input[(i3 * w + j1) * 4 + c] & 0xff);
+                        pixel += k[22] * (input[(i3 * w + j) * 4 + c] & 0xff);
+                        pixel += k[23] * (input[(i3 * w + j2) * 4 + c] & 0xff);
+                        pixel += k[24] * (input[(i3 * w + j3) * 4 + c] & 0xff);
 
                         pixel = Math.max(0,pixel);
                         pixel = Math.min(255,pixel);
-                        output.put(position, (byte) pixel);
+                        output[position] = (byte) pixel;
                     }
                 }
             }

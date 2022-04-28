@@ -49,39 +49,31 @@ public class Convolution3x3 extends Filter {
     }
 
     @Override
-    public void runJavaOnce(ByteBuffer input, ByteBuffer output, int w, int h) {
+    public void runJavaOnce(byte[] input, byte[] output, int w, int h) {
         for (int i = 0; i < h; i++) {
             for (int j = 0; j < w; j++) {
                 for (int c = 0; c < 4; c++) {
                     int position = (i * w + j) * 4 + c;
                     if (c == 3) {
-                        output.put(position, input.get(position));
+                        output[position] = input[position];
                     } else {
                         float pixel = 0.0f;
 
-                        pixel += k[0] *
-                                (input.get((Math.max(i - 1, 0) * w + Math.max(j - 1, 0)) * 4 + c) &
-                                        0xff);
-                        pixel += k[1] * (input.get((Math.max(i - 1, 0) * w + j) * 4 + c) & 0xff);
-                        pixel += k[2] * (input.get(
-                                (Math.max(i - 1, 0) * w + Math.min(j + 1, w - 1)) * 4 + c) & 0xff);
+                        pixel += k[0] * (input[(Math.max(i - 1, 0) * w + Math.max(j - 1, 0)) * 4 + c] & 0xff);
+                        pixel += k[1] * (input[(Math.max(i - 1, 0) * w + j) * 4 + c] & 0xff);
+                        pixel += k[2] * (input[(Math.max(i - 1, 0) * w + Math.min(j + 1, w - 1)) * 4 + c] & 0xff);
 
-                        pixel += k[3] * (input.get((i * w + Math.max(j - 1, 0)) * 4 + c) & 0xff);
-                        pixel += k[4] * (input.get((i * w + j) * 4 + c) & 0xff);
-                        pixel +=
-                                k[5] * (input.get((i * w + Math.min(j + 1, w - 1)) * 4 + c) & 0xff);
+                        pixel += k[3] * (input[(i * w + Math.max(j - 1, 0)) * 4 + c] & 0xff);
+                        pixel += k[4] * (input[(i * w + j) * 4 + c] & 0xff);
+                        pixel += k[5] * (input[(i * w + Math.min(j + 1, w - 1)) * 4 + c] & 0xff);
 
-                        pixel += k[6] * (input.get(
-                                (Math.min(i + 1, h - 1) * w + Math.max(j - 1, 0)) * 4 + c) & 0xff);
-                        pixel +=
-                                k[7] * (input.get((Math.min(i + 1, h - 1) * w + j) * 4 + c) & 0xff);
-                        pixel += k[8] * (input.get(
-                                (Math.min(i + 1, h - 1) * w + Math.min(j + 1, w - 1)) * 4 + c) &
-                                0xff);
+                        pixel += k[6] * (input[(Math.min(i + 1, h - 1) * w + Math.max(j - 1, 0)) * 4 + c] & 0xff);
+                        pixel += k[7] * (input[(Math.min(i + 1, h - 1) * w + j) * 4 + c] & 0xff);
+                        pixel += k[8] * (input[(Math.min(i + 1, h - 1) * w + Math.min(j + 1, w - 1)) * 4 + c] & 0xff);
 
-                        pixel = Math.max(0,pixel);
-                        pixel = Math.min(255,pixel);
-                        output.put(position, (byte) pixel);
+                        pixel = Math.max(0, pixel);
+                        pixel = Math.min(255, pixel);
+                        output[position] = (byte) pixel;
                     }
                 }
             }

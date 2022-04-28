@@ -9,7 +9,7 @@ import java.lang.String
 import java.nio.ByteBuffer
 
 class BenchmarkResultsActivity : AppCompatActivity() {
-    private val JAVA_N_EXECUTIONS = 2
+    private val JAVA_N_EXECUTIONS = 3
     private val JCL_N_EXECUTIONS = 15
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,16 +36,18 @@ class BenchmarkResultsActivity : AppCompatActivity() {
     }
 
     private fun runBenchmark(filterIdx: Int, w: Int, h: Int) {
-        // Create buffers
-        val input = ByteBuffer.allocateDirect(w * h * 4)
-        val output = ByteBuffer.allocateDirect(w * h * 4)
+        // Create buffers and arrays
+        val inputJCL = ByteBuffer.allocateDirect(w * h * 4)
+        val outputJCL = ByteBuffer.allocateDirect(w * h * 4)
+        val inputJava = ByteArray(w * h * 4)
+        val outputJava = ByteArray(w * h * 4)
         // Run java benchmark
         val filter = MainActivity.getFilterByIndex(filterIdx)
-        val javaTime = filter.benchmarkJava(input, output, w, h, JAVA_N_EXECUTIONS)
+        val javaTime = filter.benchmarkJava(inputJava, outputJava, w, h, JAVA_N_EXECUTIONS)
         val javaTimeStr = String.format("%.2f", javaTime)
         Console.writeLine("         Java: $javaTimeStr milliseconds")
         Timber.d("         Java: $javaTimeStr milliseconds")
-        val jclTime = filter.benchmarkFancyJCL(input, output, w, h, JCL_N_EXECUTIONS)
+        val jclTime = filter.benchmarkFancyJCL(inputJCL, outputJCL, w, h, JCL_N_EXECUTIONS)
         val jclTimeStr = String.format("%.2f", jclTime)
         Console.writeLine("         FancyJCL: $jclTimeStr milliseconds")
         Timber.d("         FancyJCL: $jclTimeStr milliseconds")
