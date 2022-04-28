@@ -15,7 +15,7 @@ public class GaussianBlur extends Filter {
             0.00571868f};
 
     @Override
-    public void runFancyJCLOnce(ByteBuffer input, ByteBuffer output, int w, int h)
+    public void initFancyJCL(ByteBuffer input, ByteBuffer output, int w, int h)
             throws Exception {
         FancyJCLManager.initialize(String.valueOf(MainActivity.ctx.getCacheDir()));
         // Horizontal
@@ -27,18 +27,17 @@ public class GaussianBlur extends Filter {
                     const int BLUR_RADIUS = 5;
                     const float k[11] = {0.00571868f, 0.02112909f, 0.05837343f, 0.12061129f, 0.18640801f,
                 0.21551899f, 0.18640801f, 0.12061129f, 0.05837343f, 0.02112909f, 0.00571868f};
-                    int c = d0 % 4;
-                    int j = (d0 / 4) % w;
-                    int i = (d0 / 4) / w;
+                    int c = (int) d0 % 4;
+                    int j = ((int) d0 / 4) % w;
+                    int i = ((int) d0 / 4) / w;
                     float blurredPixel = 0.0f;
                     for (int r = -BLUR_RADIUS; r <= BLUR_RADIUS; r++) {
                         int clampedJ = max(min(j + r, w - 1), 0);
-                        float sourcePixel = input[(i * w + clampedJ) * 4 + c] & 0xff;
+                        float sourcePixel = input[(i * w + clampedJ) * 4 + c];
                         blurredPixel += sourcePixel * k[r + BLUR_RADIUS];
                     }
                     aux[d0] = blurredPixel;
                     """);
-        horizontalGaussianStage.printSummary();
         horizontalGaussianStage
                 .setRunConfiguration(new RunConfiguration(new long[]{w * h * 4}, new long[]{1024}));
         // Vertical
@@ -49,34 +48,21 @@ public class GaussianBlur extends Filter {
                     const int BLUR_RADIUS = 5;
                     const float k[11] = {0.00571868f, 0.02112909f, 0.05837343f, 0.12061129f, 0.18640801f,
                 0.21551899f, 0.18640801f, 0.12061129f, 0.05837343f, 0.02112909f, 0.00571868f};
-                    int c = d0 % 4;
-                    int j = (d0 / 4) % w;
-                    int i = (d0 / 4) / w;
+                    int c = (int) d0 % 4;
+                    int j = ((int) d0 / 4) % w;
+                    int i = ((int) d0 / 4) / w;
                     float blurredPixel = 0.0f;
                     for (int r = -BLUR_RADIUS; r <= BLUR_RADIUS; r++) {
                         int clampedI = max(min(i + r, h - 1), 0);
-                        float sourcePixel = aux[(clampedI * w + j) * 4 + c] & 0xff;
+                        float sourcePixel = aux[(clampedI * w + j) * 4 + c];
                         blurredPixel += sourcePixel * k[r + BLUR_RADIUS];
                     }
                     output[d0] = blurredPixel;
                     """);
-        verticalGaussianStage.printSummary();
         verticalGaussianStage
                 .setRunConfiguration(new RunConfiguration(new long[]{w * h * 4}, new long[]{1024}));
-        // Run
-        horizontalGaussianStage.runSync();
-        verticalGaussianStage.runSync();
-        FancyJCLManager.clear();
-    }
-
-    @Override
-    public void benchmarkJava() {
-
-    }
-
-    @Override
-    public void benchmarkFancyJCL() {
-
+        jclStages.add(horizontalGaussianStage);
+        jclStages.add(verticalGaussianStage);
     }
 
     @Override

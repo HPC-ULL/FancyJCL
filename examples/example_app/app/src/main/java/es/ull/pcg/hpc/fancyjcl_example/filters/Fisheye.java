@@ -12,7 +12,7 @@ public class Fisheye extends Filter {
     final float STRENGTH = 1.4f;
 
     @Override
-    public void runFancyJCLOnce(ByteBuffer input, ByteBuffer output, int w, int h)
+    public void initFancyJCL(ByteBuffer input, ByteBuffer output, int w, int h)
             throws Exception {
         FancyJCLManager.initialize(String.valueOf(MainActivity.ctx.getCacheDir()));
         Stage stage = new Stage();
@@ -20,13 +20,13 @@ public class Fisheye extends Filter {
         stage.setOutputs(Map.of("output", output));
         stage.setKernelSource("""
                     const float STRENGTH = 1.4f;
-                    int j = d0 % w;
-                    int i = d0 / w;
+                    int j = (int) d0 % w;
+                    int i = (int) d0 / w;
                     float outputCoordX = ((float) j / (float) (w - 1) - 0.5f);
                     float outputCoordY = ((float) i / (float) (h - 1) - 0.5f);
-                    float dist = sqrt(outputCoordX * outputCoordX + outputCoordY * outputCoordY);
+                    float dist = native_sqrt(outputCoordX * outputCoordX + outputCoordY * outputCoordY);
                     float theta = atan2(outputCoordY, outputCoordX);
-                    dist = pow(dist, STRENGTH);
+                    dist = native_powr(dist, STRENGTH);
 
                     float inputCoordX = (float) (dist * cos(theta));
                     float inputCoordY = (float) (dist * sin(theta));
@@ -44,29 +44,16 @@ public class Fisheye extends Filter {
                     float slopeX = newCoordX - x0;
 
                     for (int c = 0; c < 4; c++) {
-                        float pixelY0 = (input[(y0 * w + x0) * 4 + c] & 0xff) * (1 - slopeY) + \
-                            (input[(y1 * w + x0) * 4 + c] & 0xff) * slopeY;
-                        float pixelY1 = (input[(y0 * w + x1) * 4 + c] & 0xff) * (1 - slopeY) + \
-                            (input[(y1 * w + x1) * 4 + c] & 0xff) * slopeY;
+                        float pixelY0 = input[(y0 * w + x0) * 4 + c] * (1 - slopeY) + \
+                            input[(y1 * w + x0) * 4 + c] * slopeY;
+                        float pixelY1 = input[(y0 * w + x1) * 4 + c] * (1 - slopeY) + \
+                            input[(y1 * w + x1) * 4 + c] * slopeY;
                         float pixel = pixelY0 * (1 - slopeX) + pixelY1 * slopeX;
                         output[(i * w + j) * 4 + c] = clamp(pixel, 0.0f, 255.0f);
                     }
                 """);
-        stage.setRunConfiguration(new RunConfiguration(new long[]{w * h}, new long[]{1024}));
-        stage.printSummary();
-        // Run
-        stage.runSync();
-        FancyJCLManager.clear();
-    }
-
-    @Override
-    public void benchmarkJava() {
-
-    }
-
-    @Override
-    public void benchmarkFancyJCL() {
-
+        stage.setRunConfiguration(new RunConfiguration(new long[]{w * h}, new long[]{5}));
+        jclStages.add(stage);
     }
 
     @Override

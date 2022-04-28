@@ -27,7 +27,7 @@ public class Levels extends Filter {
 
 
     @Override
-    public void runFancyJCLOnce(ByteBuffer input, ByteBuffer output, int w, int h)
+    public void initFancyJCL(ByteBuffer input, ByteBuffer output, int w, int h)
             throws Exception {
         FancyJCLManager.initialize(String.valueOf(MainActivity.ctx.getCacheDir()));
         Stage stage = new Stage();
@@ -49,10 +49,11 @@ public class Levels extends Filter {
                     const float LEVEL_WHITE_START = 200.0f;
                     const float LEVEL_WHITE_END = 255.0f;
                     
-                    float R = input[d0 * 4 + 0] & 0xff;
-                    float G = input[d0 * 4 + 1] & 0xff;
-                    float B = input[d0 * 4 + 2] & 0xff;
-                    float A = input[d0 * 4 + 3] & 0xff;
+                    int offset = (int) d0 * 4;
+                    float R = input[offset + 0];
+                    float G = input[offset + 1];
+                    float B = input[offset + 2];
+                    float A = input[offset + 3];
                     
                     // Multiply by matrix
                     float outputR = R * satMatrix00 + G * satMatrix01 + B * satMatrix02;
@@ -72,26 +73,13 @@ public class Levels extends Filter {
                     outputG = outputG * (LEVEL_WHITE_END - LEVEL_BLACK_END) + LEVEL_BLACK_END;
                     outputB = outputB * (LEVEL_WHITE_END - LEVEL_BLACK_END) + LEVEL_BLACK_END;
 
-                    output[d0 * 4 + 0] =  clamp(outputR, 0.0f, 255.0f);
-                    output[d0 * 4 + 1] =  clamp(outputG, 0.0f, 255.0f);
-                    output[d0 * 4 + 2] =  clamp(outputB, 0.0f, 255.0f);
-                    output[d0 * 4 + 3] =  A;
+                    output[offset + 0] =  clamp(outputR, 0.0f, 255.0f);
+                    output[offset + 1] =  clamp(outputG, 0.0f, 255.0f);
+                    output[offset + 2] =  clamp(outputB, 0.0f, 255.0f);
+                    output[offset + 3] =  A;
                 """);
         stage.setRunConfiguration(new RunConfiguration(new long[]{w * h}, new long[]{1024}));
-        stage.printSummary();
-        // Run
-        stage.runSync();
-        FancyJCLManager.clear();
-    }
-
-    @Override
-    public void benchmarkJava() {
-
-    }
-
-    @Override
-    public void benchmarkFancyJCL() {
-
+        jclStages.add(stage);
     }
 
     @Override

@@ -11,38 +11,26 @@ import es.ull.pcg.hpc.fancyjcl_example.MainActivity;
 public class GrayScale extends Filter {
 
     @Override
-    public void runFancyJCLOnce(ByteBuffer input, ByteBuffer output, int w, int h)
+    public void initFancyJCL(ByteBuffer input, ByteBuffer output, int w, int h)
             throws Exception {
         FancyJCLManager.initialize(String.valueOf(MainActivity.ctx.getCacheDir()));
-        Stage conv3x3 = new Stage();
-        conv3x3.setInputs(Map.of("input", input));
-        conv3x3.setOutputs(Map.of("output", output));
-        conv3x3.setKernelSource("""
-                int r =  input[d0 * 4 + 0] & 0xff;
-                int g =  input[d0 * 4 + 1] & 0xff;
-                int b =  input[d0 * 4 + 2] & 0xff;
-                int a =  input[d0 * 4 + 3] & 0xff;
+        Stage grayscale = new Stage();
+        grayscale.setInputs(Map.of("input", input));
+        grayscale.setOutputs(Map.of("output", output));
+        grayscale.setKernelSource("""
+                int offset = (int) d0 * 4;
+                int r =  input[offset + 0];
+                int g =  input[offset + 1];
+                int b =  input[offset + 2];
+                int a =  input[offset + 3];
                 char gray = clamp(r * 0.299f + g * 0.587f + b * 0.114f, 0.0f, 255.0f);
-                output[d0 * 4 + 0] = gray;
-                output[d0 * 4 + 1] = gray;
-                output[d0 * 4 + 2] = gray;
-                output[d0 * 4 + 3] = a;
+                output[offset + 0] = gray;
+                output[offset + 1] = gray;
+                output[offset + 2] = gray;
+                output[offset + 3] = a;
                 """);
-        conv3x3.printSummary();
-        conv3x3.setRunConfiguration(new RunConfiguration(new long[]{w * h}, new long[]{1024}));
-        // Run
-        conv3x3.runSync();
-        FancyJCLManager.clear();
-    }
-
-    @Override
-    public void benchmarkJava() {
-
-    }
-
-    @Override
-    public void benchmarkFancyJCL() {
-
+        grayscale.setRunConfiguration(new RunConfiguration(new long[]{w * h}, new long[]{1024}));
+        jclStages.add(grayscale);
     }
 
     @Override

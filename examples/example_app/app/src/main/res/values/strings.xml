@@ -5,16 +5,66 @@
     <string name="java_output">Java</string>
     <string name="input">Input</string>
     <string name="fancyjcl">JCL</string>
-    <string-array name="test_names">
+    <string name="run_benchmarks">Run Benchmark</string>
+    <string name="clear_selection">Clear Selection</string>
+    <string name="select_all">Select All</string>
+    <string name="run_java">Run Java</string>
+    <string name="run_fancyjcl">Run FancyJCL</string>
+    <string-array name="filter_names">
+        <item>Bilateral</item>
+        <item>Median</item>
         <item>Posterize</item>
         <item>Levels</item>
         <item>Fisheye</item>
         <item>Contrast Enhancement</item>
-        <item>Median</item>
-        <item>Bilateral</item>
         <item>Convolution5x5</item>
         <item>Grayscale</item>
         <item>Convolution3x3</item>
         <item>GaussianBlur</item>
     </string-array>
+
+    <string-array name="resolution_names">
+        <item>VGA</item>
+        <item>XGA</item>
+        <item>HD1</item>
+        <item>HD2</item>
+        <item>HD+</item>
+        <item>FHD</item>
+        <item>QHD</item>
+        <item>UHD</item>
+    </string-array>
+
+    <string-array name="resolution_descriptions">
+        <item>VGA (640x480)</item>
+        <item>XGA (1024x768)</item>
+        <item>HD1 (1280x720)</item>
+        <item>HD2 (1366x768)</item>
+        <item>HD+ (1600x900)</item>
+        <item>FHD (1920x1080)</item>
+        <item>QHD (2560x1440)</item>
+        <item>UHD (3840x2160)</item>
+    </string-array>
+
+    <integer-array name="resolutions_width">
+        <item>640</item>
+        <item>1024</item>
+        <item>1280</item>
+        <item>1366</item>
+        <item>1600</item>
+        <item>1920</item>
+        <item>2560</item>
+        <item>3840</item>
+    </integer-array>
+
+    <integer-array name="resolutions_height">
+        <item>480</item>
+        <item>768</item>
+        <item>720</item>
+        <item>768</item>
+        <item>900</item>
+        <item>1080</item>
+        <item>1440</item>
+        <item>2160</item>
+    </integer-array>
+
 </resources>

@@ -3,6 +3,7 @@ package es.ull.pcg.hpc.fancyjcl_example
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import androidx.appcompat.app.AlertDialog
@@ -10,10 +11,13 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
+import es.ull.pcg.hpc.fancyjcl_example.filters.*
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.newSingleThreadContext
+import timber.log.Timber
 import timber.log.Timber.Forest.plant
 
 class MainActivity : AppCompatActivity() {
@@ -58,7 +62,7 @@ class MainActivity : AppCompatActivity() {
         MainActivity.layoutInflater =
             getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
         instance = this
-        scopeBackground = CoroutineScope(Dispatchers.Default + SupervisorJob())
+        scopeBackground = CoroutineScope(newSingleThreadContext("background_jobs"))
         scopeUI = CoroutineScope(Dispatchers.Main + SupervisorJob())
         val arrayList: ArrayList<Any> = ArrayList()
         arrayList.add(TabAdapter.Tests())
@@ -78,5 +82,22 @@ class MainActivity : AppCompatActivity() {
         lateinit var instance: MainActivity
         lateinit var scopeBackground: CoroutineScope
         lateinit var scopeUI: CoroutineScope
+        fun getFilterByIndex(index: Int): Filter {
+            return when (index) {
+                0 -> Bilateral()
+                1 -> Median()
+                2 -> Posterize()
+                3 -> Levels()
+                4 -> Fisheye()
+                5 -> Contrast()
+                6 -> Convolution5x5()
+                7 -> GrayScale()
+                8 -> Convolution3x3()
+                9 -> GaussianBlur()
+                else -> {
+                    throw Exception("No filter for index $index")
+                }
+            }
+        }
     }
 }

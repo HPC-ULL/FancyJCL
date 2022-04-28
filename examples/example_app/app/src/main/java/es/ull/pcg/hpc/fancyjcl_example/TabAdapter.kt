@@ -21,8 +21,12 @@ class TabAdapter(arrayList: ArrayList<Any>) :
                 )
             TestsViewHolder(view)
         } else {
-            val view: View =
-                MainActivity.layoutInflater.inflate(R.layout.benchmarks_layout, parent, false)
+            val view: View = BenchmarkView(MainActivity.ctx)
+            view.layoutParams =
+                LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT
+                )
             BenchmarksViewHolder(view)
         }
     }

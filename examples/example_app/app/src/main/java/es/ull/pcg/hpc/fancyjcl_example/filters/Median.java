@@ -11,35 +11,38 @@ import es.ull.pcg.hpc.fancyjcl_example.MainActivity;
 
 public class Median extends Filter {
 
-    final int RADIUS = 7;
+    final int RADIUS = 2;
+    final int medianPosition = ((RADIUS * 2 + 1) * (RADIUS * 2 + 1)) / 2;
 
     @Override
-    public void runFancyJCLOnce(ByteBuffer input, ByteBuffer output, int w, int h)
+    public void initFancyJCL(ByteBuffer input, ByteBuffer output, int w, int h)
             throws Exception {
         FancyJCLManager.initialize(String.valueOf(MainActivity.ctx.getCacheDir()));
         Stage stage = new Stage();
         stage.setInputs(Map.of("input", input, "w", w, "h", h));
         stage.setOutputs(Map.of("output", output));
         stage.setKernelSource("""
-                    const char RADIUS = 7;
-                    const unsigned char medianPosition = ((RADIUS * 2 + 1) * (RADIUS * 2 + 1)) / 2;
-                    unsigned char accum[256] = {0};
-                    int c = d0 % 4;
-                    int j = (d0 / 4) % w;
-                    int i = (d0 / 4) / w;
+                    const uchar RADIUS =\040""" + RADIUS + """
+                    ;
+                    const uchar medianPosition =\040""" + medianPosition + """
+                    ;
+                    char accum[256] = {0};
+                    int c = (int) d0 % 4;
+                    int j = ((int) d0 / 4) % w;
+                    int i = ((int) d0 / 4) / w;
                     if (c == 3) {
                         output[d0] = input[d0];
                     } else {
                         for (int ri = -RADIUS; ri <= RADIUS; ri++) {
+                            int i2 = clamp(i + ri, 0, h - 1);
                             for (int rj = -RADIUS; rj <= RADIUS; rj++) {
-                                int i2 = clamp(i + ri, 0, h - 1);
                                 int j2 = clamp(j + rj, 0, w - 1);
-                                int pixel = input[(i2 * w + j2) * 4 + c] & 0xff;
+                                uchar pixel = input[(i2 * w + j2) * 4 + c];
                                 accum[pixel] += 1;
                             }
                         }
-                        unsigned char accumIdx = 0;
-                        unsigned char count = 0;
+                        uchar count = 0;
+                        int accumIdx = 0;
                         while (count <= medianPosition) {
                             count += accum[accumIdx];
                             accumIdx += 1;
@@ -48,26 +51,12 @@ public class Median extends Filter {
                     }
                 """);
         stage.setRunConfiguration(new RunConfiguration(new long[]{w * h * 4}, new long[]{4}));
-        stage.printSummary();
-        // Run
-        stage.runSync();
-        FancyJCLManager.clear();
-    }
-
-    @Override
-    public void benchmarkJava() {
-
-    }
-
-    @Override
-    public void benchmarkFancyJCL() {
-
+        jclStages.add(stage);
     }
 
     @Override
     public void runJavaOnce(ByteBuffer input, ByteBuffer output, int w, int h) {
         short[] accum = new short[256];
-        int medianPosition = ((RADIUS * 2 + 1) * (RADIUS * 2 + 1)) / 2;
         for (int i = 0; i < h; i++) {
             for (int j = 0; j < w; j++) {
                 for (int c = 0; c < 4; c++) {

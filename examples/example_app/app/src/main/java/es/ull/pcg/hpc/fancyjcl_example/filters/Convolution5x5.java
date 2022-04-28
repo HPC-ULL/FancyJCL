@@ -17,7 +17,7 @@ public class Convolution5x5 extends Filter {
 ;
 
     @Override
-    public void runFancyJCLOnce(ByteBuffer input, ByteBuffer output, int w, int h)
+    public void initFancyJCL(ByteBuffer input, ByteBuffer output, int w, int h)
             throws Exception {
         FancyJCLManager.initialize(String.valueOf(MainActivity.ctx.getCacheDir()));
         Stage conv3x3 = new Stage();
@@ -26,62 +26,49 @@ public class Convolution5x5 extends Filter {
         conv3x3.setKernelSource("""
                 const float k[25] = {0, 0, -1, 0, 0, 0, -1, -2, -1, 0, -1, -2, 16, -2, -1, 0, -1, -2, -1, 0, 0, 0, -1, 0, 0};
                                         ;
-                int c = d0 % 4;
-                int j = (d0 / 4) % w;
-                int i = (d0 / 4) / w;
+                int c = (int) d0 % 4;
+                int j = ((int) d0 / 4) % w;
+                int i = ((int) d0 / 4) / w;
                 if (c == 3) {
-                    output[d0] = input[d0] & 0xff;
+                    output[d0] = input[d0];
                 } else {
                     float pixel = 0.0f;
                     
-                    pixel += k[0] * (input[(max(i - 2, 0) * w + max(j - 2, 0)) * 4 + c] & 0xff);
-                    pixel += k[1] * (input[(max(i - 2, 0) * w + max(j - 1, 0)) * 4 + c] & 0xff);
-                    pixel += k[2] * (input[(max(i - 2, 0) * w + j) * 4 + c] & 0xff);
-                    pixel += k[3] * (input[(max(i - 2, 0) * w + min(j + 1, w - 1)) * 4 + c] & 0xff);
-                    pixel += k[4] * (input[(max(i - 2, 0) * w + min(j + 2, w - 1)) * 4 + c] & 0xff);
+                    pixel += k[0] * input[(max(i - 2, 0) * w + max(j - 2, 0)) * 4 + c];
+                    pixel += k[1] * input[(max(i - 2, 0) * w + max(j - 1, 0)) * 4 + c];
+                    pixel += k[2] * input[(max(i - 2, 0) * w + j) * 4 + c];
+                    pixel += k[3] * input[(max(i - 2, 0) * w + min(j + 1, w - 1)) * 4 + c];
+                    pixel += k[4] * input[(max(i - 2, 0) * w + min(j + 2, w - 1)) * 4 + c];
                     
-                    pixel += k[5] * (input[(max(i - 1, 0) * w + max(j - 2, 0)) * 4 + c] & 0xff);
-                    pixel += k[6] * (input[(max(i - 1, 0) * w + max(j - 1, 0)) * 4 + c] & 0xff);
-                    pixel += k[7] * (input[(max(i - 1, 0) * w + j) * 4 + c] & 0xff);
-                    pixel += k[8] * (input[(max(i - 1, 0) * w + min(j + 1, w - 1)) * 4 + c] & 0xff);
-                    pixel += k[9] * (input[(max(i - 1, 0) * w + min(j + 2, w - 1)) * 4 + c] & 0xff);
+                    pixel += k[5] * input[(max(i - 1, 0) * w + max(j - 2, 0)) * 4 + c];
+                    pixel += k[6] * input[(max(i - 1, 0) * w + max(j - 1, 0)) * 4 + c];
+                    pixel += k[7] * input[(max(i - 1, 0) * w + j) * 4 + c];
+                    pixel += k[8] * input[(max(i - 1, 0) * w + min(j + 1, w - 1)) * 4 + c];
+                    pixel += k[9] * input[(max(i - 1, 0) * w + min(j + 2, w - 1)) * 4 + c];
                     
-                    pixel += k[10] * (input[(i * w + max(j - 2, 0)) * 4 + c] & 0xff);
-                    pixel += k[11] * (input[(i * w + max(j - 1, 0)) * 4 + c] & 0xff);
-                    pixel += k[12] * (input[(i * w + j) * 4 + c] & 0xff);
-                    pixel += k[13] * (input[(i * w + min(j + 1, w - 1)) * 4 + c] & 0xff);
-                    pixel += k[14] * (input[(i * w + min(j + 2, w - 1)) * 4 + c] & 0xff);
+                    pixel += k[10] * input[(i * w + max(j - 2, 0)) * 4 + c];
+                    pixel += k[11] * input[(i * w + max(j - 1, 0)) * 4 + c];
+                    pixel += k[12] * input[(i * w + j) * 4 + c];
+                    pixel += k[13] * input[(i * w + min(j + 1, w - 1)) * 4 + c];
+                    pixel += k[14] * input[(i * w + min(j + 2, w - 1)) * 4 + c];
                     
-                    pixel += k[15] * (input[(min(i + 1, h - 1) * w + max(j - 2, 0)) * 4 + c] & 0xff);
-                    pixel += k[16] * (input[(min(i + 1, h - 1) * w + max(j - 1, 0)) * 4 + c] & 0xff);
-                    pixel += k[17] * (input[(min(i + 1, h - 1) * w + j) * 4 + c] & 0xff);
-                    pixel += k[18] * (input[(min(i + 1, h - 1) * w + min(j + 1, w - 1)) * 4 + c] & 0xff);
-                    pixel += k[19] * (input[(min(i + 1, h - 1) * w + min(j + 2, w - 1)) * 4 + c] & 0xff);
+                    pixel += k[15] * input[(min(i + 1, h - 1) * w + max(j - 2, 0)) * 4 + c];
+                    pixel += k[16] * input[(min(i + 1, h - 1) * w + max(j - 1, 0)) * 4 + c];
+                    pixel += k[17] * input[(min(i + 1, h - 1) * w + j) * 4 + c];
+                    pixel += k[18] * input[(min(i + 1, h - 1) * w + min(j + 1, w - 1)) * 4 + c];
+                    pixel += k[19] * input[(min(i + 1, h - 1) * w + min(j + 2, w - 1)) * 4 + c];
                     
-                    pixel += k[20] * (input[(min(i + 2, h - 1) * w + max(j - 2, 0)) * 4 + c] & 0xff);
-                    pixel += k[21] * (input[(min(i + 2, h - 1) * w + max(j - 1, 0)) * 4 + c] & 0xff);
-                    pixel += k[22] * (input[(min(i + 2, h - 1) * w + j) * 4 + c] & 0xff);
-                    pixel += k[23] * (input[(min(i + 2, h - 1) * w + min(j + 1, w - 1)) * 4 + c] & 0xff);
-                    pixel += k[24] * (input[(min(i + 2, h - 1) * w + min(j + 2, w - 1)) * 4 + c] & 0xff);
+                    pixel += k[20] * input[(min(i + 2, h - 1) * w + max(j - 2, 0)) * 4 + c];
+                    pixel += k[21] * input[(min(i + 2, h - 1) * w + max(j - 1, 0)) * 4 + c];
+                    pixel += k[22] * input[(min(i + 2, h - 1) * w + j) * 4 + c];
+                    pixel += k[23] * input[(min(i + 2, h - 1) * w + min(j + 1, w - 1)) * 4 + c];
+                    pixel += k[24] * input[(min(i + 2, h - 1) * w + min(j + 2, w - 1)) * 4 + c];
                     
                     output[d0] = clamp(pixel, 0.0f, 255.0f);
                 }
                 """);
-        conv3x3.printSummary();
         conv3x3.setRunConfiguration(new RunConfiguration(new long[]{w * h * 4}, new long[]{1024}));
-        // Run
-        conv3x3.runSync();
-        FancyJCLManager.clear();
-    }
-
-    @Override
-    public void benchmarkJava() {
-
-    }
-
-    @Override
-    public void benchmarkFancyJCL() {
-
+        jclStages.add(conv3x3);
     }
 
     @Override
