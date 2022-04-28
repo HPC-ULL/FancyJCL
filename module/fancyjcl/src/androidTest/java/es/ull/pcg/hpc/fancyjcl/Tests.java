@@ -15,7 +15,7 @@ public class Tests extends TestCase {
         Context ctx = InstrumentationRegistry.getInstrumentation().getTargetContext();
         FancyJCLManager.initialize(ctx.getCacheDir().getAbsolutePath());
         int size = 25;
-        short kConstant = -2;
+        short kConstant = 10;
         byte[] input = new byte[size];
         byte[] output = new byte[size];
         for (int i = 0; i < input.length; i++) {
@@ -30,7 +30,7 @@ public class Tests extends TestCase {
         stage.setRunConfiguration(new RunConfiguration(new long[]{size}, new long[]{size}));
         stage.runSync();
         for (int i = 0; i < output.length; i++) {
-            assertEquals(output[i], input[i] * kConstant, 0.0f);
+            assertEquals(output[i] & 0xff, input[i] * kConstant, 0.0f);
         }
         FancyJCLManager.clear();
     }
@@ -39,7 +39,7 @@ public class Tests extends TestCase {
         Context ctx = InstrumentationRegistry.getInstrumentation().getTargetContext();
         FancyJCLManager.initialize(ctx.getCacheDir().getAbsolutePath());
         int size = 25;
-        float kConstant = -2;
+        float kConstant = 5;
         // Have the data in java
         byte[] data = new byte[size];
         byte[] outputGt = new byte[size];
@@ -130,7 +130,7 @@ public class Tests extends TestCase {
         Context ctx = InstrumentationRegistry.getInstrumentation().getTargetContext();
         FancyJCLManager.initialize(ctx.getCacheDir().getAbsolutePath());
         int size = 25;
-        float kConstant = -2;
+        float kConstant = 3;
         ByteBuffer input = ByteBuffer.allocateDirect(size);
         ByteBuffer output = ByteBuffer.allocateDirect(size);
         for (int i = 0; i < input.capacity(); i++) {

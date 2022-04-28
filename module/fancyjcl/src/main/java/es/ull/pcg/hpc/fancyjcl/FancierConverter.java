@@ -135,7 +135,7 @@ class FancierConverter {
     static public String getOCLType(Object input) {
         String type = getType(input);
         type = type.replace("array", "*");
-        type = type.replace("byte", "char");
+        type = type.replace("byte", "uchar");
         type = type.replace("rgbaimage", "uchar4*");
         return type;
     }
