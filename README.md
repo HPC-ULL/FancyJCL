@@ -3,7 +3,7 @@
 [![Release](https://jitpack.io/v/HPC-ULL/FancyJCL.svg)](https://jitpack.io/#HPC-ULL/FancyJCL)
 
 # Description
-This android module uses the [Fancier](https://github.com/HPC-ULL/Fancier) High-Performance library to allow execution of OpenCL kernels on the GPU from Java or Kotlin. It is not just an OpenCL wrapper, since it takes care of all the glue code that is needed to initialize, transfer memory, create programs an kernels and manage the OpenCL execution queue.
+This android module uses the [Fancier](https://github.com/HPC-ULL/Fancier) High-Performance library to allow execution of OpenCL kernels on the GPU from Java or Kotlin. It is not just an OpenCL wrapper, since it takes care of all the glue code that is needed to initialize, transfer memory, create programs and kernels and manage the OpenCL execution queue.
 
 # Getting Started
 
