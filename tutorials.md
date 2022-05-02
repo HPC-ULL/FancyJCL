@@ -67,7 +67,7 @@ stage.setOutputs(Map.of("output", output));
 
 ## Declaring the kernel
 
-To specify what the OpenCL kernel to execute is going to be we write it like it was GLSL, but without the kernel signature. The function `get_global_id(n)`  can be replaced with `dn`. The names used in the `setInputs` and `setOutputs` methods must be used here.
+To specify what the OpenCL kernel to execute is going to be we write it like it was OpenCL kernel code, but without the kernel signature. The function `get_global_id(n)`  can be replaced with `dn`. The names used in the `setInputs` and `setOutputs` methods must be used here.
 
 ```java
 stage.setKernelSource("""
