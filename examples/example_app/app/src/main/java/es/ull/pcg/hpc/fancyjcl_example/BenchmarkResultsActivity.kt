@@ -8,6 +8,7 @@ import timber.log.Timber
 import java.io.File
 import java.lang.String
 import java.nio.ByteBuffer
+import java.util.*
 
 class BenchmarkResultsActivity : AppCompatActivity() {
     private var file: File
@@ -65,12 +66,12 @@ class BenchmarkResultsActivity : AppCompatActivity() {
         // Run java benchmark
         val filter = MainActivity.getFilterByIndex(filterIdx)
         val javaTime = filter.benchmarkJava(inputJava, outputJava, w, h, JAVA_N_EXECUTIONS)
-        val javaTimeStr = String.format("%.2f", javaTime)
+        val javaTimeStr = String.format(Locale.US, "%.2f", javaTime)
         file.appendText("$javaTimeStr,")
         Console.writeLine("         Java: $javaTimeStr milliseconds")
         Timber.d("         Java: $javaTimeStr milliseconds")
         val jclTime = filter.benchmarkFancyJCL(inputJCL, outputJCL, w, h, JCL_N_EXECUTIONS)
-        val jclTimeStr = String.format("%.2f", jclTime)
+        val jclTimeStr = String.format(Locale.US, "%.2f", jclTime)
         file.appendText(jclTimeStr)
         Console.writeLine("         FancyJCL: $jclTimeStr milliseconds")
         Timber.d("         FancyJCL: $jclTimeStr milliseconds")
